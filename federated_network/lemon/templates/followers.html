@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Followers</title>
+</head>
+<body>
+    <div>
+         <h2>My Followers</h2>
+        <ul>
+        {% for follow in followers %}
+            <li>{{ follow.id |safe }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

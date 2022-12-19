@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Note</title>
+</head>
+<body>
+    <form method="post" action="note-create-validator/">
+        {% csrf_token %}
+        <h2>Make a Note</h2>
+        <p>If you want to send note to all your followers
+            <br>don't write anything in username</p>
+        <p>To: </p><input name="username">
+        <p>Text: </p><textarea name="content"></textarea>
+        <input type="submit" value="Create" />
+    </form>
+</body>
+</html>

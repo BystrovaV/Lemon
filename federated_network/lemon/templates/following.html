@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Followings</title>
+</head>
+<body>
+    <div>
+        {%include 'navigation-bar.html'%}
+    </div>
+
+    <form method="post" action="follow/">
+        {% csrf_token %}
+        <h2>Find A Friend</h2>
+        <p>If your friend is from another instance, please enter it domain
+            <br>Example: you want to follow for Alice from alice.local
+            <br>Instance: alice.local<br>Username: Alice</p>
+        <p>Instance:<br> <input name="instance"/></p>
+        <p>Username:<br> <input name="username"/></p>
+        <input type="submit" value="Follow" />
+    </form>
+
+    <div>
+        <h2>My Friends</h2>
+        <ul>
+        {% for follow in following %}
+            <li>{{ follow.id |safe }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+
+</body>
+</html>

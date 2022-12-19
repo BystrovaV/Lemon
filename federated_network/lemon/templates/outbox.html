@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Outbox</title>
+</head>
+<body>
+    <div>
+        {%include 'navigation-bar.html'%}
+    </div>
+    {% for item in collection %}
+    <div>
+        <h2>{{ item.type |safe }}</h2>
+        <p>{{ item.object.content |safe}}</p>
+        <p>{{ item.to |safe}}</p>
+    </div>
+    {% endfor %}
+</body>
+</html>
