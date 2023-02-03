@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Welcome to Lemon!</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href={% static "css/variables.css" %}>
+    <link rel="stylesheet" href={% static "css/index.css" %}>
+</head>
+<body>
+    <div class="container">
+        <div class="container__form">
+            <h1 class="name__header">LEMON</h1>
+            <h2 class="sign__header">Sign Up</h2>
+        
+            <form method="post" action="sign_up_form/">
+                {% csrf_token %}
+                <!-- <select name="isSign">
+                    <option>Sign</option>
+                    <option>Register</option>
+                </select> -->
+                <div class="input__field">
+                    <p class="input__label">Username</p>
+                    <input name="username" class="input__name"/>
+                </div>
+                <div class="input__field">
+                    <p class="input__label">Name</p>
+                    <input name="name" class="input__name"/>
+                </div>
+                <div class="input__field">
+                    <p class="input__label">Password</p>
+                    <input name="password" class="input__name"/>
+                </div>
+                <div class="input__field">
+                    <p class="input__label">Repeat password</p>
+                    <input name="password_repeat" class="input__name"/>
+                </div>
+                <!-- <p>Username<br> <input name="username"/></p>
+                <p>Name<br> <input name="name"/></p> -->
+                <div class="btn__container">
+                    <input type="submit" value="sign up" class="btn__rose"/>
+                </div>
+                <div class="btn__container">
+                    <a href="{% url 'sign-in'%}">Sign In</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

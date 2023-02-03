@@ -1,19 +1,55 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Inbox</title>
+
+    <link rel="stylesheet" href={% static "css/variables.css" %}>
+    <link rel="stylesheet" href={% static "css/person-main.css" %}>
+    <link rel="stylesheet" href={% static "css/outbox.css" %}>
 </head>
 <body>
-    <div>
-        {%include 'navigation-bar.html'%}
+    <div class="wrapper">
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar__inner">{%include 'navigation-bar.html'%}</div>
+        </div>
+        <div class="page__body">
+            <div class="filter__panel">
+            </div>
+            <div>
+                {% for item in collection %}
+                <div class="item" id="{{ item.id |safe}}">
+                    <div class="item__left">
+                        <h2 class="item__type">{{ item.type |safe }}</h2>
+                        <p class="item__to">{{ item.actor |safe}}</p>
+                    </div>
+                    <div class="item__content__wrap">
+                        <p class="item__content">{{ item.object.content |safe}}
+                        </p>
+                    </div>
+                    <img class="remove__img" src="{% static 'css/img/remove.png' %}">
+                </div>
+            {% endfor %}
+            </div>
+        </div>
     </div>
-    {% for item in collection %}
-    <div>
-        <h2>{{ item.type |safe }}</h2>
-        <p>{{ item.object.content |safe}}</p>
-        <p>{{ item.to |safe}}</p>
-    </div>
-    {% endfor %}
+    <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script>
+        $(".item").on('click', function () {
+            var str = $(this).attr('id');
+            str = str.substring(7);
+
+            var hostname = str.substring(0, str.indexOf('/')).split('.');
+            str = str.substring(str.indexOf('/') + 1);
+
+            slices = str.split('/');
+            // alert(slices[0] + "_" + slices[2]);
+            path = window.location.href + "?" + "host=" + hostname[0] + "&domen=" + hostname[1] + "&actor="
+             + slices[0] + "&id=" + slices[2];
+
+            window.location.href = path;
+        });
+    </script>
 </body>
 </html>

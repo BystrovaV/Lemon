@@ -1,0 +1,37 @@
+.note__container {
+    background-color: var(--lilac-color);
+
+    padding: 27px 33px;
+    border-radius: 21px;
+}
+
+.note__content__wrap {
+    background-color: whitesmoke;
+    min-height: 50px;
+}
+
+.add__img {
+    width: 16px;
+    height: 16px;
+
+    cursor: pointer;
+}
+
+.btn__rose {
+    background-color: var(--rose-color);
+    border-radius: 5px;
+    border: 0;
+    padding: 7px 51px;
+
+    font-size: 18px;
+    line-height: 23px;
+    letter-spacing: 0.05em;
+    margin: 50px 0 5px 0;
+
+    cursor: pointer;
+}
+
+.btn__container {
+    display: flex;
+    justify-content: center;
+}

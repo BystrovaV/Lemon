@@ -23,6 +23,7 @@ urlpatterns = [
     re_path(r'^@(\w+)/notes/note-create', views.note_create, name="note-create"),
     re_path(r'^@(\w+)/notes/(\w+)', views.note_view, name="note"),
     re_path(r'^@(\w+)/notes', views.notes_view, name="notes"),
+    # re_path(r'^@(\w+)/inbox/(\w+)', views.activity, name="inbox_item"),
     re_path(r'^@(\w+)/inbox', views.inbox_view, name="inbox"),
     re_path(r'^@(\w+)/outbox/(\w+)', views.activity, name="activity"),
     re_path(r'^@(\w+)/outbox', views.outbox_view, name="outbox"),
@@ -30,6 +31,8 @@ urlpatterns = [
     re_path(r'^@(\w+)/followers', views.followers_view, name="followers"),
     re_path(r'^@(\w+)/follow/', views.following_action),
     re_path(r'^@([^/]+)$', views.person_main, name="person"),
-    path("sign/", views.sign),
-    path("", views.index),
+    path("sign-up/sign_up_form/", views.sign_up_form),
+    path("sign-up/", views.sign_up, name="sign-up"),
+    path("sign_form/", views.sign_form),
+    path("", views.index, name="sign-in"),
 ]

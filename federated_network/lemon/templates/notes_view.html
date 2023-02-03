@@ -1,20 +1,39 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Notes</title>
+    <link rel="stylesheet" href={% static "css/variables.css" %}>
+    <link rel="stylesheet" href={% static "css/notes_view.css" %}>
+    <!-- <link rel="stylesheet" href={% static "css/person-main.css" %}> -->
 </head>
 <body>
-    <h2>Notes</h2>
-    <a href="{{person.uris.notes}}/note-create">Create</a>
-
-    <div>
+    <div class="header__container">
+        <a class="create__a" href="{{person.uris.notes}}/note-create">
+            <img class="create__img" src="{% static 'css/img/create.png' %}">
+        </a>
         <h2>My Notes</h2>
-        <ul>
+    </div>
+
+    <div class="notes">
         {% for note in notes %}
-            <li>{{ note.content |safe }}</li>
+        <div class="note__container">
+            <img class="edit__img" src="{% static 'css/img/create.png' %}">
+            <img class="remove__img" src="{% static 'css/img/remove.png' %}">
+            <div class="person__username">{{ person.username |safe}}</div>
+            <div class="creation__date">creation date</div>
+            <div class="reciever__username"><p>To:</p>
+                <p>Reciever username</p>
+            </div>
+            <div class="note__content__wrap">
+                <div class="note__content">
+                    {{ note.content |safe }}
+                     <!-- <p>a<br>a<br>a<br>a<br>a<br>a<br>a<br>a<br></p> -->
+                </div>
+            </div>
+        </div>
         {% endfor %}
-        </ul>
     </div>
 </body>
 </html>

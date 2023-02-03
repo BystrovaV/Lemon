@@ -1,7 +1,64 @@
-<ul>
-    <li><a href="{{person.uris.followers}}">Followers</a></li>
-    <li><a href="{{person.uris.following}}}">Following</a></li>
-    <li><a href="{{person.uris.outbox}}">Outbox</a></li>
-    <li><a href="{{person.uris.inbox}}">Inbox</a></li>
-    <li><a href="{{person.uris.notes}}">Notes</a></li>
-</ul>
+<style>
+    .navigation__container {
+        background-color: var(--lilac-color);
+        position: fixed;
+        position: sticky;
+        position: relative;
+
+        height: calc(100vh - 40px);
+        float: left;
+
+        width: 100%;
+
+        margin-right: 25px;
+        border-radius: 21px;
+        padding: 25px 0 0 25px;
+    }
+
+    .navigation__item {
+        text-decoration: none;
+    }
+
+    .navigation__item > a {
+        text-decoration: none;
+        font-size: 20px;
+        color: black;
+    }
+
+    .logo {
+        font-size: 24px;
+        text-decoration: underline;
+    }
+
+    .quit {
+        font-size: 22px;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    .navigation__list {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 70%;
+    }
+    /* .navigation__container__inner {
+        width: 210px;
+    } */
+</style>
+<div class="navigation__container" >
+    <!-- <div class="navigation__container__inner"> -->
+        <ul class="navigation__list">
+            <li class="navigation__item logo">LEMON</li>
+            <li class="navigation__item"><a href="{{person.uris.notes}}">Notes</a></li>
+            <li class="navigation__item"><a href="{{person.uris.followers}}">Followers</a></li>
+            <li class="navigation__item"><a href="{{person.uris.following}}}">Following</a></li>
+            <li class="navigation__item"><a href="{{person.uris.outbox}}">Outbox</a></li>
+            <li class="navigation__item"><a href="{{person.uris.inbox}}">Inbox</a></li>
+            <li class="navigation__item"><a href="{{person.uris.outbox}}">Settings</a></li>
+            <li class="navigation__item quit"><a href="{{person.uris.inbox}}">Quit</a></li>
+        </ul>
+    <!-- </div> -->
+</div>

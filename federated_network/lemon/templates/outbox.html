@@ -1,19 +1,46 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Outbox</title>
+
+    <link rel="stylesheet" href={% static "css/variables.css" %}>
+    <link rel="stylesheet" href={% static "css/person-main.css" %}>
+    <link rel="stylesheet" href={% static "css/outbox.css" %}>
 </head>
 <body>
-    <div>
-        {%include 'navigation-bar.html'%}
+    <div class="wrapper">
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar__inner">{%include 'navigation-bar.html'%}</div>
+        </div>
+        <div class="page__body">
+            <div class="filter__panel">
+            </div>
+            <div>
+                {% for item in collection %}
+                <div class="item" id="{{ item.id |safe}}">
+                    <div class="item__left">
+                        <h2 class="item__type">{{ item.type |safe }}</h2>
+                        <p class="item__to">{{ item.to |safe}}</p>
+                    </div>
+                    <div class="item__content__wrap">
+                        <p class="item__content">{{ item.object.content |safe}}aaaaaaaaaaaaaaaaaaaaaaaaa
+                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        </p>
+                    </div>
+                    <img class="remove__img" src="{% static 'css/img/remove.png' %}">
+                </div>
+            {% endfor %}
+            </div>
+        </div>
     </div>
-    {% for item in collection %}
-    <div>
-        <h2>{{ item.type |safe }}</h2>
-        <p>{{ item.object.content |safe}}</p>
-        <p>{{ item.to |safe}}</p>
-    </div>
-    {% endfor %}
+    <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script>
+        $(".item").on('click', function () {
+            // alert($(this).attr('id'));
+            window.location.href = $(this).attr('id');
+        });
+    </script>
 </body>
 </html>

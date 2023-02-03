@@ -1,18 +1,59 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Note</title>
+
+    <link rel="stylesheet" href={% static "css/variables.css" %}>
+    <link rel="stylesheet" href={% static "css/person-main.css" %}>
+    <link rel="stylesheet" href={% static "css/note_create.css" %}>
 </head>
 <body>
-    <form method="post" action="note-create-validator/">
-        {% csrf_token %}
-        <h2>Make a Note</h2>
-        <p>If you want to send note to all your followers
-            <br>don't write anything in username</p>
-        <p>To: </p><input name="username">
-        <p>Text: </p><textarea name="content"></textarea>
-        <input type="submit" value="Create" />
-    </form>
+    <div class="wrapper">
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar__inner">{%include 'navigation-bar.html'%}</div>
+        </div>
+        <div class="main page__body">
+            <form method="post" action="note-create-validator/">
+                {% csrf_token %}
+                <!-- <h2>Make a Note</h2>
+                <p>If you want to send note to all your followers
+                    <br>don't write anything in username</p>
+                <p>To: </p><input name="username">
+                <p>Text: </p><textarea name="content"></textarea>
+                <input type="submit" value="Create" /> -->
+        
+                <div class="note__container">
+                    <div class="person__username">{{ person.username |safe}}</div>
+                    <div class="reciever__username"><p>To:</p>
+                        <input name="reciever" class="reciever__input"/>
+                        <img src="{% static 'css/img/add.png' %}" class="add__img"/>
+                    </div>
+                    <div class="note__content__wrap">
+                        <div class="note__content">
+                            <textarea name="content"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn__container">
+                        <input type="submit" value="Create" class="btn__rose"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(".add__img").click(function () {
+                var $clone = $(".reciever__input").first().clone();
+                $clone.val("");
+                $(".reciever__input").last().after($clone);
+            });
+        });
+    </script>
 </body>
 </html>
