@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Outbox</title>
+
+    <link rel="stylesheet" href={% static "lemon/variables.css" %}>
+    <link rel="stylesheet" href={% static "lemon/person-main.css" %}>
+    <link rel="stylesheet" href={% static "lemon/outbox_item.css" %}>
+</head>
+<body>
+    <div class="wrapper">
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar__inner">{%include 'navigation-bar.html'%}</div>
+        </div>
+        <div class="page__body">
+            <div class="note__container">
+                <div class="note__top-panel">
+                    <img src="{% static 'lemon/img/back-button.png' %}" class="btn-back"/>
+                    <img src="{% static 'lemon/img/delete.png' %}" class="btn-delete"/>
+                </div>
+                
+                <div class="note__user-info">
+                    <p class="header username">{{user.username |safe}}</p>
+
+                    <div class="user-to">
+                        <p>To:</p>
+                        {% for item in activity.to %}
+                        <div class="user-to__container">{{item |safe}}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <diV class="note__content">
+                    <textarea name="content" class="content" disabled="disabled">{{activity.object.content}}</textarea>
+                </diV>
+
+                <div class="note__bottom-panel">
+                    <div class="round-btn reply">
+                        <img src="{% static 'lemon/img/turn-left.png' %}" class="btn-reply"/>
+                        Reply
+                    </div>
+
+                    <div class="round-btn forward">
+                        <img src="{% static 'lemon/img/turn-right.png' %}" class="btn-forward"/>
+                        Forward
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+</body>
+</html>

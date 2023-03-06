@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <title>Note</title>
 
-    <link rel="stylesheet" href={% static "css/variables.css" %}>
-    <link rel="stylesheet" href={% static "css/person-main.css" %}>
-    <link rel="stylesheet" href={% static "css/note_create.css" %}>
+    <link rel="stylesheet" href={% static "lemon/variables.css" %}>
+    <link rel="stylesheet" href={% static "lemon/person-main.css" %}>
+    <link rel="stylesheet" href={% static "lemon/note_create.css" %}>
 </head>
 <body>
     <div class="wrapper">
@@ -26,14 +26,26 @@
         
                 <div class="note__container">
                     <div class="person__username">{{ person.username |safe}}</div>
-                    <div class="reciever__username"><p>To:</p>
-                        <input name="reciever" class="reciever__input"/>
-                        <img src="{% static 'css/img/add.png' %}" class="add__img"/>
+                    <div class="reciever__username">
+                        <div class="reciever__input__wrap">
+                            <p>To:</p>
+                            <input name="reciever__input" class="reciever__input" id="reciever__input"/>
+                            <div class="btn__rose btn__add" onclick="addReciever()">Add</div>
+                            <!-- <img src="{% static 'lemon/img/add.png' %}" class="add__img"/> -->
+                        </div>
+                        <div class="recievers" id="recievers">
+                            <div class="reciever" >
+                                <input name="reciever" class="reciever__output" disabled="disabled"/>
+                                <img src="{% static 'lemon/img/remove.png' %}" class="remove__img"
+                                onclick="deleteReciever(this)"/>
+                            </div>
+                           
+                        </div>
                     </div>
                     <div class="note__content__wrap">
-                        <div class="note__content">
-                            <textarea name="content"></textarea>
-                        </div>
+                        <!-- <div class="note__content"> -->
+                            <textarea name="content" class="note__textarea"></textarea>
+                        <!-- </div> -->
                     </div>
 
                     <div class="btn__container">
@@ -47,13 +59,24 @@
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
 
     <script>
-        $(document).ready(function () {
-            $(".add__img").click(function () {
-                var $clone = $(".reciever__input").first().clone();
-                $clone.val("");
-                $(".reciever__input").last().after($clone);
-            });
-        });
+        function addReciever () {
+            var val = $("#reciever__input").val();
+
+            var $clone = $(".reciever").first().clone();
+
+            $clone.css('display', 'flex');
+            $clone.css('visibility', 'visible');
+            $clone.find('.reciever__output').first().val(val);
+
+            $(".reciever").last().after($clone);
+        }
+     
+        function deleteReciever(button) {
+            var reciever = button.parentNode;
+            alert(reciever)
+            var recievers = reciever.parentNode;
+            recievers.removeChild(reciever);
+        }
     </script>
 </body>
 </html>

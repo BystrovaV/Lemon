@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Judson:wght@400;700&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html{
+    font-size: 16px;
+    font-family: var(--main_font);
+}
+
+/*----------------------- VARIABLES -----------------------*/
+
+:root{
+    --main_font: 'Judson', sans-serif;
+    --yellow-color: #F0EEDA;
+    --rose-color: #DAA2C4;
+    --lilac-color: #F7F2FF;
+    --lilac-dark-color: #E5DCF3;
+    --yellow-dark-color: #EAE7C7;
+    /* --rose-color: #EEB8CF;
+    --shadow-color: rgba(85, 3, 3, 0.2);
+    --orange-color: rgba(255, 199, 143, 0.6); */
+}
+
+.header {
+    font-family: 'Judson';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 23px;
+    letter-spacing: 0.05em;
+}
+
+.btn-rose {
+    background-color: var(--rose-color);
+    border-radius: 5px;
+    border: 0;
+    padding: 7px 51px;
+
+    cursor: pointer;
+}
+
+.btn-font-big {
+    font-size: 18px;
+    line-height: 23px;
+    letter-spacing: 0.05em;
+}
+
+.btn-font-small {
+    font-size: 16px;
+    line-height: 18px;
+    letter-spacing: 0.05em;
+}

@@ -1,0 +1,95 @@
+.note__container {
+    background-color: var(--yellow-color);
+
+    padding: 27px 33px;
+    border-radius: 21px;
+}
+
+/* ---------------------------- TOP PANEL --------------------------- */
+.note__top-panel {
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn-back, .btn-delete {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+}
+
+/* ---------------------------- USER INFO --------------------------- */
+.note__user-info {
+    margin-top: 20px;
+}
+
+.user-to {
+    display: flex;
+    align-items: center;
+
+    margin-top: 5px;
+}
+
+.user-to__container {
+    width: fit-content;
+    height: 25px;
+    background-color: white;
+
+    border: 0.5px solid #000000;
+    border-radius: 21px;
+    
+    padding: 3px 10px;
+    margin-left: 10px;
+}
+
+/* ---------------------------- CONTENT --------------------------- */
+
+.note__content {
+    margin: 25px 0;
+    background-color: whitesmoke;
+    height: 50vh;
+}
+
+.content {
+    width: 100%;
+    height: 100%;
+
+    outline: none;
+	/* border: 1px solid #999; */
+    resize: none;
+}
+
+/* ---------------------------- BOTTOM PANEL --------------------------- */
+.note__bottom-panel {
+    display: flex;
+    width: 40%;
+    justify-content: space-between;
+}
+
+.round-btn {
+    background-color: white;
+    border: 0.5px solid #000000;
+    border-radius: 21px;
+
+    padding: 8px 13px;
+
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 18px;
+    letter-spacing: 0.05em;
+
+    display: flex;
+    align-items:center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.reply {
+    padding: 8px 23px;
+}
+
+.btn-reply, .btn-forward {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}

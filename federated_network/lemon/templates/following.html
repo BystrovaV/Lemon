@@ -1,33 +1,80 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>My Followings</title>
+
+    <link rel="stylesheet" href={% static "lemon/variables.css" %}>
+    <link rel="stylesheet" href={% static "lemon/person-main.css" %}>
+    <link rel="stylesheet" href={% static "lemon/followers.css" %}>
 </head>
 <body>
-    <div>
-        {%include 'navigation-bar.html'%}
+    <div class="wrapper">
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar__inner">{%include 'navigation-bar.html'%}</div>
+        </div>
+        <div class="page__body">
+            <div class="search__panel">
+                <!-- <form method="post" action="">
+                    {% csrf_token %} -->
+                    
+                    <div class="search__inner">
+                        <div class="search__wrap">
+                            <img class="close__img" src="{% static 'lemon/img/close.png' %}"/>
+                            <input name="search" id="search" placeholder="Search" class="search" value="{{ search |safe}}"/>
+                        </div>
+                        <button class="btn__submit">
+                            <img class="btn__search img" src="{% static 'lemon/img/loupe.png' %}"/>
+                        </button>
+                    </div>
+                <!-- </form> -->
+            </div>
+            <div>
+                {% for follow in following %}
+                <div class="item" id="{{ follower.preferredUsername |safe}}">
+                    <div class="item__left">
+                        <h2 class="item__name">{{ follow.name |safe}}</h2>
+                        <p class="item__id">{{ follow.preferredUsername |safe}}</p>
+                    </div>
+                    <!-- <p>{{ follower.id | safe}}</p> -->
+                    <div class="btns">
+                        <img class="img" src="{% static 'lemon/img/message.png' %}">
+                        <img class="img" src="{% static 'lemon/img/right.png' %}">
+                        <img class="img" src="{% static 'lemon/img/remove.png' %}">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
-    <form method="post" action="follow/">
-        {% csrf_token %}
-        <h2>Find A Friend</h2>
-        <p>If your friend is from another instance, please enter it domain
-            <br>Example: you want to follow for Alice from alice.local
-            <br>Instance: alice.local<br>Username: Alice</p>
-        <p>Instance:<br> <input name="instance"/></p>
-        <p>Username:<br> <input name="username"/></p>
-        <input type="submit" value="Follow" />
-    </form>
+    <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            var data = {{ followers |safe}};
+           
+            $("#search").on('click', function () {
+                data.forEach(item => {
+                    $(document.getElementById(item.preferredUsername)).show(); 
+                });
+            });
 
-    <div>
-        <h2>My Friends</h2>
-        <ul>
-        {% for follow in following %}
-            <li>{{ follow.id |safe }}</li>
-        {% endfor %}
-        </ul>
-    </div>
+            $(".btn__search").on('click', function () {
+                var search = $('#search').val();
+                // var s = "duhfjsd".search
+                // alert(data);
 
+                data.forEach(item => {
+                    if (!item.name.includes(search) && !item.preferredUsername.includes(search)) {
+                        // var index = ;
+                        // var div = $("#" + item.preferredUsername);
+                        $(document.getElementById(item.preferredUsername)).hide();
+                    }
+                        
+                });
+            });
+        });
+    </script>
 </body>
 </html>

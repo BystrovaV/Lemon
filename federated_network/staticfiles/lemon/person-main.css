@@ -1,0 +1,29 @@
+.wrapper {
+    position: relative;
+    padding: 20px;
+}
+
+.page__body {
+    position: relative;
+    width: calc(100% - 210px - 25px);
+    /* margin: 0 25px; */
+    /* width: 100%; */
+    float: right;
+    overflow: auto;
+}
+
+.sidebar {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 20px;
+    
+    height: calc(100vh - 2 * 20px);
+    /* width: 235px; */
+    width: 210px;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+  

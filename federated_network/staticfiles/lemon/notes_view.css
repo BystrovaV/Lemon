@@ -1,0 +1,83 @@
+.note__container:nth-child(odd) {
+    background-color: var(--yellow-color);
+    margin: 21px 0;
+    /* margin: 20px 0px; */
+}
+
+.note__container:nth-child(even) {
+    background-color: var(--lilac-color);
+}
+
+.note__container:hover:nth-child(even) {
+    background-color: #E5DCF3;
+}
+
+.note__container:hover:nth-child(odd) {
+    background-color: #EAE7C7;
+}
+
+.note__container:last-child {
+    margin-bottom: 0;
+}
+
+.note__container {
+    padding: 27px 33px;
+    border-radius: 21px;
+}
+
+.reciever__username {
+    display: flex;
+    margin: 19px 0;
+}
+
+.note__content__wrap {
+    background-color: whitesmoke;
+    min-height: 50px;
+}
+
+.person__username {
+    font-size: 20px;
+}
+
+.edit__img {
+    width: 25px;
+    height: 25px;
+
+    position: absolute;
+    right: calc(33px + 15px + 25px);
+}
+
+.remove__img {
+    width: 25px;
+    height: 25px;
+
+    position: absolute;
+    right: 33px;
+}
+
+.create__a {
+    position: absolute;
+    right: 33px;
+}
+
+.create__img {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
+h2 {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 28px;
+    /* identical to box height */
+
+    letter-spacing: 0.05em;
+}
+
+.header__container {
+    padding: 17px 33px;
+    border-radius: 21px;
+    background-color: var(--lilac-color);
+}

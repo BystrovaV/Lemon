@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <title>My Followers</title>
 
-    <link rel="stylesheet" href={% static "css/variables.css" %}>
-    <link rel="stylesheet" href={% static "css/person-main.css" %}>
-    <link rel="stylesheet" href={% static "css/followers.css" %}>
+    <link rel="stylesheet" href={% static "lemon/variables.css" %}>
+    <link rel="stylesheet" href={% static "lemon/person-main.css" %}>
+    <link rel="stylesheet" href={% static "lemon/followers.css" %}>
 </head>
 <body>
     <div class="wrapper">
@@ -21,11 +21,11 @@
                     
                     <div class="search__inner">
                         <div class="search__wrap">
-                            <img class="close__img" src="{% static 'css/img/close.png' %}"/>
+                            <img class="close__img" src="{% static 'lemon/img/close.png' %}"/>
                             <input name="search" id="search" placeholder="Search" class="search" value="{{ search |safe}}"/>
                         </div>
                         <button class="btn__submit">
-                            <img class="btn__search img" src="{% static 'css/img/loupe.png' %}"/>
+                            <img class="btn__search img" src="{% static 'lemon/img/loupe.png' %}"/>
                         </button>
                     </div>
                 <!-- </form> -->
@@ -39,9 +39,9 @@
                     </div>
                     <!-- <p>{{ follower.id | safe}}</p> -->
                     <div class="btns">
-                        <img class="img" src="{% static 'css/img/message.png' %}">
-                        <img class="img" src="{% static 'css/img/right.png' %}">
-                        <img class="img" src="{% static 'css/img/remove.png' %}">
+                        <img class="img" src="{% static 'lemon/img/message.png' %}">
+                        <img class="img" src="{% static 'lemon/img/right.png' %}">
+                        <img class="img" src="{% static 'lemon/img/remove.png' %}">
                     </div>
                 </div>
                 {% endfor %}

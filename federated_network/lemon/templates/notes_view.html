@@ -4,23 +4,35 @@
 <head>
     <meta charset="UTF-8">
     <title>Notes</title>
-    <link rel="stylesheet" href={% static "css/variables.css" %}>
-    <link rel="stylesheet" href={% static "css/notes_view.css" %}>
+    <link rel="stylesheet" href={% static "lemon/variables.css" %}>
+    <link rel="stylesheet" href={% static "lemon/notes_view.css" %}>
     <!-- <link rel="stylesheet" href={% static "css/person-main.css" %}> -->
 </head>
 <body>
+    {% if permission == 0 %}
     <div class="header__container">
         <a class="create__a" href="{{person.uris.notes}}/note-create">
             <img class="create__img" src="{% static 'css/img/create.png' %}">
         </a>
         <h2>My Notes</h2>
     </div>
+    {% elif permission == 1 %}
+    <div class="header__container">
+        <div class="btn-friend btn-rose btn-font-small">Become a Friends</div>
+        <div class="btn-message"></div>
+        <h2>{{person.username |safe}}</h2>
+    </div>
+    {% endif %}
 
     <div class="notes">
         {% for note in notes %}
         <div class="note__container">
-            <img class="edit__img" src="{% static 'css/img/create.png' %}">
-            <img class="remove__img" src="{% static 'css/img/remove.png' %}">
+
+            {% if permission == 0 %}
+            <img class="edit__img" src="{% static 'lemon/img/create.png' %}">
+            <img class="remove__img" src="{% static 'lemon/img/remove.png' %}">
+            {% endif %}
+
             <div class="person__username">{{ person.username |safe}}</div>
             <div class="creation__date">creation date</div>
             <div class="reciever__username"><p>To:</p>
@@ -29,7 +41,6 @@
             <div class="note__content__wrap">
                 <div class="note__content">
                     {{ note.content |safe }}
-                     <!-- <p>a<br>a<br>a<br>a<br>a<br>a<br>a<br>a<br></p> -->
                 </div>
             </div>
         </div>

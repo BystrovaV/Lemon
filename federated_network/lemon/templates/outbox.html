@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <title>Outbox</title>
 
-    <link rel="stylesheet" href={% static "css/variables.css" %}>
-    <link rel="stylesheet" href={% static "css/person-main.css" %}>
-    <link rel="stylesheet" href={% static "css/outbox.css" %}>
+    <link rel="stylesheet" href={% static "lemon/variables.css" %}>
+    <link rel="stylesheet" href={% static "lemon/person-main.css" %}>
+    <link rel="stylesheet" href={% static "lemon/outbox.css" %}>
 </head>
 <body>
     <div class="wrapper">
@@ -25,13 +25,12 @@
                         <p class="item__to">{{ item.to |safe}}</p>
                     </div>
                     <div class="item__content__wrap">
-                        <p class="item__content">{{ item.object.content |safe}}aaaaaaaaaaaaaaaaaaaaaaaaa
-                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        <p class="item__content">{{ item.object.content |safe}}
                         </p>
                     </div>
-                    <img class="remove__img" src="{% static 'css/img/remove.png' %}">
+                    <img class="remove__img" src="{% static 'lemon/img/remove.png' %}">
                 </div>
-            {% endfor %}
+                {% endfor %}
             </div>
         </div>
     </div>

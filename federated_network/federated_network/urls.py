@@ -31,8 +31,7 @@ urlpatterns = [
     re_path(r'^@(\w+)/followers', views.followers_view, name="followers"),
     re_path(r'^@(\w+)/follow/', views.following_action),
     re_path(r'^@([^/]+)$', views.person_main, name="person"),
-    path("sign-up/sign_up_form/", views.sign_up_form),
     path("sign-up/", views.sign_up, name="sign-up"),
-    path("sign_form/", views.sign_form),
-    path("", views.index, name="sign-in"),
+    path("logout/", views.logout_view, name="logout"),
+    path("", views.sign_in, name="sign-in"),
 ]

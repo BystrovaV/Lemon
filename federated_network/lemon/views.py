@@ -1,8 +1,9 @@
 import json
 from urllib.parse import urlparse
+from django import http
 
 import requests
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
@@ -11,63 +12,79 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from lemon.activities.objects import as_activitystream
 from lemon.models import Person, Note, Activity
 from lemon.activities import objects, verbs
+from lemon.users.forms import UserRegisterForm
+import lemon.users.users_checks as users_checks
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 
 # вход в систему
-def index(request):
-    return render(request, "index.html")
+def sign_in(request):
+    if request.method == 'POST':
+        username=request.POST.get("username", "Undefined")
+        password=request.POST.get("password", "Undefined")
+        user = authenticate(request, username=username, password=password)
 
-
-# обработка входа в систему
-def sign_form(request):
-    # is_sign = request.POST.get("isSign", "Sign")
-    # if is_sign == "Sign":
-    person = get_object_or_404(Person, username=request.POST.get("username", "Undefined"))
-    #TODO: authentificathion
-    # else:
-        # person = Person(username=request.POST.get("username", "Undefined")
-                        # , name=request.POST.get("name", "Undefined"))
-        # person.save()
-
-    return HttpResponseRedirect(f"/@{person.username}")
+        if user is not None:
+            login(request, user=user)
+            return HttpResponseRedirect(f"/@{username}")
+    return render(request, 'sign-in.html')
 
 
 def sign_up(request):
-    # return HttpResponseRedirect(f"/@{person.username}")
-    return render(request, "sign-up.html")
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
 
+        if form.is_valid():
+            form.save()
+            
+            username = form.cleaned_data.get('username')
+            name = form.cleaned_data.get('first_name')
 
-def sign_up_form(request):
-    # TODO: проверка уникальности имени, проверка пароля и т.д.
-    person = Person(username=request.POST.get("username", "Undefined")
-                        , name=request.POST.get("name", "Undefined"))
-    person.save()
-    return HttpResponseRedirect(f"/@{person.username}")
-    # return render(request, "register.html")
+            person = Person(username=username, name=name)
+            person.save()
+
+            return HttpResponseRedirect(f"/@{person.username}")
+        else:
+            # TODO: validate mistakes
+            print("phhhh....")
+        	# messages.success(request, f'Создан аккаунт {username}!')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'sign-up.html', {'form': form})
 
 
 # главная страница пользователя
+@login_required(login_url="/")
 def person_main(request, username):
+    permission = users_checks.is_visitor(request.user, username)
+
     person = get_object_or_404(Person, username=username)
+    user = get_object_or_404(Person, username=request.user)
+
     if "get_json" in request.GET:
         return JsonResponse(objects.Actor(person).to_json(context=True))
 
-    # data = {"person": person}
     collection = objects.OrderedCollection(
         person.notes.all(),
         id=person.uris.notes
     ).items
-    data = {"person": person, "notes": collection}
 
+    data = {"person": person, "user": user, "notes": collection, "permission": permission}
     return render(request, "person-main.html", context=data)
 
 
 # $ curl -X POST 'http://alice.local/@alice/outbox' -H "Content-Type: application/activity+json"
 # -d '{"type": "Follow", "object": "http://bob.local/@bob"}'
+@login_required(login_url="/")
 def following_view(request, username):
-    person = get_object_or_404(Person, username=username)
-    following = objects.OrderedCollection(person.following.all()).items
+    if users_checks.is_visitor(request.user, username=username):
+        return users_checks.response_error()
+
+    user = get_object_or_404(Person, username=username)
+    following = objects.OrderedCollection(user.following.all()).items
     # return JsonResponse(following.to_json(context=True))
-    return render(request, "following.html", context={"person":person, "following": following})
+    return render(request, "following.html", context={"user":user, "following": following})
 
 
 def following_action(request, username):
@@ -88,9 +105,13 @@ def following_action(request, username):
     return HttpResponseRedirect(f"/@{person.username}/following")
 
 
+@login_required(login_url="/")
 def followers_view(request, username):
-    person = get_object_or_404(Person, username=username)
-    person_followers = person.followers.all()
+    if users_checks.is_visitor(request.user, username=username):
+        return users_checks.response_error()
+
+    user = get_object_or_404(Person, username=username)
+    user_followers = user.followers.all()
 
     # if request.method == "POST":
     #     search = request.POST.get("search", "Undefined")
@@ -98,21 +119,26 @@ def followers_view(request, username):
     #     return render(request, "followers.html", context={"person":person, "followers": person_followers, "search": search})
 
     if "get_json" in request.GET:
-        followers = objects.OrderedCollection(person_followers)
+        followers = objects.OrderedCollection(user_followers)
         return JsonResponse(followers.to_json(context=True))
     else:
-        person_followers = list(map(lambda x: x.to_activitystream(), person_followers))
-        return render(request, "followers.html", context={"person":person, "followers": person_followers, "search": ""})
+        user_followers = list(map(lambda x: x.to_activitystream(), user_followers))
+        return render(request, "followers.html", context={"user":user, "followers": user_followers, "search": ""})
 
 
 @csrf_exempt
+@login_required(login_url="/")
 def outbox_view(request, username):
     person = get_object_or_404(Person, username=username)
 
     if request.method == "GET":
-        _object = person.activities.filter(remote=False).order_by('-created_at')
+        user = get_object_or_404(Person, username=request.user)
+        if users_checks.is_visitor(request.user, username=username):
+            return users_checks.response_error()
+        
+        _object = user.activities.filter(remote=False).order_by('-created_at')
         collection = objects.OrderedCollection(_object).items
-        data = {"person": person, "collection": collection}
+        data = {"user": user, "collection": collection}
         return render(request, "outbox.html", context=data)
         # return JsonResponse(collection.to_json(context=True))
 
@@ -232,19 +258,35 @@ def dereference(ap_id, type=None):
     return json.loads(res.text, object_hook=as_activitystream)
 
 
+@login_required(login_url="/")
 def activity(request, username, aid):
+    if users_checks.is_visitor(request.user, username=username):
+        return users_checks.response_error()
+    
+    user = get_object_or_404(Person, username=username)
     activity = get_object_or_404(Activity, pk=aid)
     payload = activity.payload.decode("utf-8")
     activity = json.loads(payload, object_hook=objects.as_activitystream)
-    return JsonResponse(activity.to_json(context=True))
+    # print(activity.type)
+    # <Create: {"type": "Create", "to": ["http://bob.local/@bob_the_first"], 
+    #           "actor": "http://alice.local/@Alice", 
+    #           "object": {"type": "Note", "id": "http://alice.local/@Alice/notes/11", 
+    #                      "content": "Test #1. Send message to bob_the_first"}}>
+    return render(request, "outbox_item.html", context={"user":user, "activity":activity})
+    
+    # return JsonResponse(activity.to_json(context=True))
 
 
 @csrf_exempt
+@login_required(login_url="/")
 def inbox_view(request, username):
     # http://alice.local/@Alice/inbox/?host=bob.local&actor=@huston&id=10
     person = get_object_or_404(Person, username=username)
 
     if request.method == "GET":
+        if users_checks.is_visitor(request.user, username=username):
+            return users_checks.response_error()
+    
         hostname = request.GET.get("host", "undefined")
         domen = request.GET.get("domen", "undefined")
         actor = request.GET.get("actor", "undefined")
@@ -263,7 +305,7 @@ def inbox_view(request, username):
         _object = person.activities.filter(remote=True).order_by('-created_at')
         collection = objects.OrderedCollection(_object).items
 
-        data = {"person": person, "collection": collection}
+        data = {"user": person, "collection": collection}
         return render(request, "inbox.html", context=data)
         # return JsonResponse(collection.to_json(context=True))
 
@@ -330,16 +372,18 @@ def notes_view(request, username):
         person.notes.all(),
         id=person.uris.notes
     ).items
-    data = {"person": person, "notes": collection}
+    data = {"user": person, "notes": collection}
     return render(request, "person-main.html", context=data)
     #return JsonResponse(collection.to_json(context=True))
 
 
+@login_required(login_url="/")
 def note_view(request, username, note_id):
     note = get_object_or_404(Note, pk=note_id)
     return JsonResponse(objects.Note(note).to_json(context=True))
 
 
+@login_required(login_url="/")
 def note_create(request, username):
     person = get_object_or_404(Person, username=username)
     return render(request, "note_create.html")
@@ -393,3 +437,7 @@ def note_create_validator(request, username):
     # else:
     
     return HttpResponseRedirect(f"{person.uris.notes}")
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect("/")
