@@ -44,7 +44,10 @@ def sign_up(request):
             person = Person(username=username, name=name)
             person.save()
 
-            return HttpResponseRedirect(f"/@{person.username}")
+            user = authenticate(request, username=username, password=form.cleaned_data.get('password'))
+            if user is not None:
+                login(request, user=user)
+                return HttpResponseRedirect(f"/@{username}")
         else:
             # TODO: validate mistakes
             print("phhhh....")
@@ -55,15 +58,18 @@ def sign_up(request):
 
 
 # главная страница пользователя
-@login_required(login_url="/")
+# @login_required(login_url="/")
 def person_main(request, username):
-    permission = users_checks.is_visitor(request.user, username)
-
     person = get_object_or_404(Person, username=username)
-    user = get_object_or_404(Person, username=request.user)
-
+    
     if "get_json" in request.GET:
         return JsonResponse(objects.Actor(person).to_json(context=True))
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect("/")
+
+    permission = users_checks.is_visitor(request.user, username)
+    user = get_object_or_404(Person, username=request.user)
 
     collection = objects.OrderedCollection(
         person.notes.all(),
@@ -76,8 +82,11 @@ def person_main(request, username):
 
 # $ curl -X POST 'http://alice.local/@alice/outbox' -H "Content-Type: application/activity+json"
 # -d '{"type": "Follow", "object": "http://bob.local/@bob"}'
-@login_required(login_url="/")
+# @login_required(login_url="/")
 def following_view(request, username):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect("/")
+    
     if users_checks.is_visitor(request.user, username=username):
         return users_checks.response_error()
 
@@ -105,14 +114,11 @@ def following_action(request, username):
     return HttpResponseRedirect(f"/@{person.username}/following")
 
 
-@login_required(login_url="/")
+# @login_required(login_url="/")
 def followers_view(request, username):
-    if users_checks.is_visitor(request.user, username=username):
-        return users_checks.response_error()
-
+    
     user = get_object_or_404(Person, username=username)
     user_followers = user.followers.all()
-
     # if request.method == "POST":
     #     search = request.POST.get("search", "Undefined")
     #     person_followers = filter(lambda x: search in x["name"] or search in x["preferredUsername"], person_followers)
@@ -122,19 +128,28 @@ def followers_view(request, username):
         followers = objects.OrderedCollection(user_followers)
         return JsonResponse(followers.to_json(context=True))
     else:
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect("/")
+    
+        if users_checks.is_visitor(request.user, username=username):
+            return users_checks.response_error()
+        
         user_followers = list(map(lambda x: x.to_activitystream(), user_followers))
         return render(request, "followers.html", context={"user":user, "followers": user_followers, "search": ""})
 
-
+# @login_required(login_url="/")
 @csrf_exempt
-@login_required(login_url="/")
 def outbox_view(request, username):
     person = get_object_or_404(Person, username=username)
 
     if request.method == "GET":
-        user = get_object_or_404(Person, username=request.user)
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect("/")
+    
         if users_checks.is_visitor(request.user, username=username):
             return users_checks.response_error()
+        
+        user = get_object_or_404(Person, username=request.user)
         
         _object = user.activities.filter(remote=False).order_by('-created_at')
         collection = objects.OrderedCollection(_object).items
@@ -148,6 +163,7 @@ def outbox_view(request, username):
 
     # если активити - сообщение, то оборачиваем в Создать
     if activity.type == "Note":
+        print("In note body")
         obj = activity
         activity = verbs.Create(
             to=person.uris.followers,
@@ -158,6 +174,7 @@ def outbox_view(request, username):
     activity.validate()
 
     if activity.type == "Create":
+        print("In create body")
         if activity.object.type != "Note":
             raise Exception("Sorry, you can only create Notes objects")
 
@@ -217,6 +234,7 @@ def get_or_create_remote_person(ap_id):
 
 
 def deliver(activity):
+    print("In deliver")
     audience = activity.get_audience()
     activity = activity.strip_audience()
     audience = get_final_audience(audience)
@@ -234,6 +252,8 @@ def get_final_audience(audience):
         elif isinstance(obj, objects.Actor):
             final_audience.append(obj.id)
         # elif isinstance(obj, objects.Person):
+    print("Get Final audience")
+    print(final_audience)
     return set(final_audience)
 
 
@@ -247,9 +267,11 @@ def deliver_to(ap_id, activity):
         msg = "Failed to deliver activity {0} to {1}"
         msg = msg.format(activity.type, obj.inbox)
         raise Exception(msg)
+    print("Success deliver")
 
 
 def dereference(ap_id, type=None):
+    print(ap_id)
     res = requests.get(ap_id, params={"get_json": "true"})
 
     if res.status_code != 200:
@@ -258,8 +280,11 @@ def dereference(ap_id, type=None):
     return json.loads(res.text, object_hook=as_activitystream)
 
 
-@login_required(login_url="/")
+# @login_required(login_url="/")
 def activity(request, username, aid):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect("/")
+    
     if users_checks.is_visitor(request.user, username=username):
         return users_checks.response_error()
     
@@ -276,14 +301,16 @@ def activity(request, username, aid):
     
     # return JsonResponse(activity.to_json(context=True))
 
-
+# @login_required(login_url="/")
 @csrf_exempt
-@login_required(login_url="/")
 def inbox_view(request, username):
     # http://alice.local/@Alice/inbox/?host=bob.local&actor=@huston&id=10
     person = get_object_or_404(Person, username=username)
 
     if request.method == "GET":
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect("/")
+        
         if users_checks.is_visitor(request.user, username=username):
             return users_checks.response_error()
     
@@ -363,27 +390,36 @@ def handle_follow(activity):
 
 
 def notes_view(request, username):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect("/")
+    
     person = get_object_or_404(Person, username=username)
-    print("notes-view")
+
+    # print("notes-view")
     # <QuerySet [<Note: Note object (1)>, <Note: Note object (3)>, <Note: Note object (4)>]>
     # collection = objects.OrderedCollection(person.notes.all())
-    print(person.notes.all())
+    # print(person.notes.all())
+
     collection = objects.OrderedCollection(
         person.notes.all(),
         id=person.uris.notes
     ).items
+    
     data = {"user": person, "notes": collection}
     return render(request, "person-main.html", context=data)
     #return JsonResponse(collection.to_json(context=True))
 
 
-@login_required(login_url="/")
+# @login_required(login_url="/")
 def note_view(request, username, note_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect("/")
+    
     note = get_object_or_404(Note, pk=note_id)
     return JsonResponse(objects.Note(note).to_json(context=True))
 
 
-@login_required(login_url="/")
+# @login_required(login_url="/")
 def note_create(request, username):
     person = get_object_or_404(Person, username=username)
     return render(request, "note_create.html")
@@ -405,6 +441,8 @@ def note_create_validator(request, username):
 
     # TODO: for all followers
     recievers = request.POST.getlist("reciever", ["python"])
+    
+    print(request.POST)
     content = request.POST.get("content", "Undefined")
 
     audience = []
@@ -415,11 +453,11 @@ def note_create_validator(request, username):
             person1 = Person.objects.get(username=reciever)
             audience.append(person1.uris.id)
         except ObjectDoesNotExist:
-            continue
-            # print("Объект не сушествует")
+            print("Объект не сушествует")
+            continue            
         except MultipleObjectsReturned:
+            print("Найдено более одного объекта")
             continue
-            # print("Найдено более одного объекта")
         
     note = objects.Note(content=content)
     create = verbs.Create(to=audience, object=note, actor=person.uris.id)

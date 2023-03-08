@@ -15,7 +15,7 @@
             <div class="sidebar__inner">{%include 'navigation-bar.html'%}</div>
         </div>
         <div class="main page__body">
-            <form method="post" action="note-create-validator/">
+            <form method="post" action="note-create-validator/" id="form">
                 {% csrf_token %}
                 <!-- <h2>Make a Note</h2>
                 <p>If you want to send note to all your followers
@@ -35,7 +35,7 @@
                         </div>
                         <div class="recievers" id="recievers">
                             <div class="reciever" >
-                                <input name="reciever" class="reciever__output" disabled="disabled"/>
+                                <input name="reciever" class="reciever__output" readonly/>
                                 <img src="{% static 'lemon/img/remove.png' %}" class="remove__img"
                                 onclick="deleteReciever(this)"/>
                             </div>
@@ -68,6 +68,9 @@
             $clone.css('visibility', 'visible');
             $clone.find('.reciever__output').first().val(val);
 
+            // alert($(".reciever").last());
+            //$("#form").children(".note__container")
+            //.children(".reciever__username").children("#recievers").children(".reciever").last().after($clone);
             $(".reciever").last().after($clone);
         }
      
