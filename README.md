@@ -21,6 +21,32 @@
 - Возможность посещать главную страницу пользователя
 - Отправление скрытых копий, добавление скрытых получателей
 
-Ссылка на курсовой проект: https://drive.google.com/file/d/1TvC4jd_b1dwY4CqK4lRQ5jhqqmwYCKPW/view?usp=sharing
-
-Ссылка на презентацию: https://docs.google.com/presentation/d/1491YxQ0zsBGEG6q3W5pX6IqiAWtndO1-/edit?usp=sharing&ouid=103415213381976839723&rtpof=true&sd=true
+# Installation
+Для запуска веб-приложения на двух серверах нужно провести дополнительные настройки. В качестве веб-сервера будет использоваться приложение nginx. 
+Для начала в файл hosts нужно добавить два новых хоста. Для операционной системы Windows данный файл находится по следующему пути: C:\Windows\System32\drivers\etc. Пусть первый сервер называется alice.local, второй — bob.local. Следовательно, в указанный файл добавится строчка
+```
+127.0.1.1	alice.local bob.local
+```
+Следующим шагом нужно настроить конфигурационный файл для nginx. Для первого сервера ниже приведен пример настройки, для второго меняется название сервера и номер порта (например, 8001).
+```
+server {
+    		listen 80;
+    		index index.html index.htm;
+    		server_name alice.local;
+    		server_name_in_redirect off;
+    		location / {
+        		proxy_pass http://127.0.0.1:8000;
+        		proxy_set_header X-Forwarded-Host $host;
+    		}
+	}
+```
+Изначально база данных создается пустой, чтобы создать в ней все таблицы, используются следующие команды
+```
+python .\manage.py migrate --settings=federated_network.settings
+python .\manage.py migrate --settings=federated_network.settings-bob
+```
+Последним шагом запускаются сервера
+```
+python .\manage.py runserver # alice
+python .\manage.py runserver 8001 --settings=federated_network.settings-bob
+```
