@@ -52,7 +52,7 @@
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
     <script>
         $(document).ready(function () {
-            var data = {{ followers |safe}};
+            var data = {{ following |safe}};
            
             $("#search").on('click', function () {
                 data.forEach(item => {

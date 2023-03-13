@@ -54,3 +54,9 @@ html{
     line-height: 18px;
     letter-spacing: 0.05em;
 }
+
+.btn-img {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}

@@ -68,8 +68,22 @@ h2 {
     margin-right: 30px;
 }
 
+/*--------------------------------- FILTER PANEL --------------------------------*/
 .filter__panel {
     padding: 17px 33px;
     border-radius: 21px;
     background-color: var(--lilac-color);
+
+    display: flex;
+    align-items: center;
+}
+
+.filter__item {
+    margin-right: 20px;
+    display: flex;
+    align-items:center;
+}
+
+.filter__item label {
+    margin-left: 5px;
 }

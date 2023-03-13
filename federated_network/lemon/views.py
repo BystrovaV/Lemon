@@ -14,9 +14,11 @@ from lemon.models import Person, Note, Activity
 from lemon.activities import objects, verbs
 from lemon.users.forms import UserRegisterForm
 import lemon.users.users_checks as users_checks
+import lemon.users.outbox_deliver as outbox_deliver
 
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.template.loader import render_to_string
+
 
 # вход в систему
 def sign_in(request):
@@ -135,7 +137,25 @@ def followers_view(request, username):
             return users_checks.response_error()
         
         user_followers = list(map(lambda x: x.to_activitystream(), user_followers))
+        print(user_followers)
         return render(request, "followers.html", context={"user":user, "followers": user_followers, "search": ""})
+
+
+# def outbox_filter(request, username):
+#     print("outbox_filter")
+#     user = get_object_or_404(Person, username=request.GET.get('username', None))
+#     _object = user.activities.filter(remote=False).order_by('-created_at')
+#     collection = objects.OrderedCollection(_object).to_json(context=True)
+
+#     # collection["orderedItems"] = list(filter(lambda x: x['type'] == 'Create', 
+#                                             #  collection["orderedItems"]))
+
+#     data = {"user": user, "collection": collection}
+
+#     print(render_to_string('outbox.html',
+#         data, request=request))
+#     return JsonResponse(data)
+
 
 # @login_required(login_url="/")
 @csrf_exempt
@@ -152,7 +172,10 @@ def outbox_view(request, username):
         user = get_object_or_404(Person, username=request.user)
         
         _object = user.activities.filter(remote=False).order_by('-created_at')
-        collection = objects.OrderedCollection(_object).items
+
+        collection = objects.OrderedCollection(_object).to_json(context=True)["orderedItems"]
+        # collection = list(map(lambda x: x.to_json(), collection))
+        
         data = {"user": user, "collection": collection}
         return render(request, "outbox.html", context=data)
         # return JsonResponse(collection.to_json(context=True))
@@ -186,8 +209,8 @@ def outbox_view(request, username):
 
         # TODO: check for actor being the right actor object
         activity.object.id = note.uris.id
-        activity.id = store(activity, person)
-        deliver(activity)
+        activity.id = outbox_deliver.store(activity, person)
+        outbox_deliver.deliver(activity)
 
         return HttpResponseRedirect(note.uris.id)
 
@@ -195,89 +218,16 @@ def outbox_view(request, username):
         # if activity.object.type != "Person":
         #     raise Exception("Sorry, you can only follow Persons objects")
 
-        followed = get_or_create_remote_person(activity.object)
+        followed = outbox_deliver.get_or_create_remote_person(activity.object)
         person.following.add(followed)
 
         activity.actor = person.uris.id
         activity.to = followed.uris.id
-        activity.id = store(activity, person)
-        deliver(activity)
+        activity.id = outbox_deliver.store(activity, person)
+        outbox_deliver.deliver(activity)
         return HttpResponse() # TODO: code 202
 
     raise Exception("Invalid Request")
-
-
-def store(activity, person, remote=False):
-    payload = bytes(json.dumps(activity.to_json()), "utf-8")
-    obj = Activity(payload=payload, person=person, remote=remote)
-    if remote:
-        obj.ap_id = activity.id
-    obj.save()
-    return obj.ap_id
-
-
-def get_or_create_remote_person(ap_id):
-    try:
-        person = Person.objects.get(ap_id=ap_id)
-    except Person.DoesNotExist:
-        person   = dereference(ap_id)
-        hostname = urlparse(person.id).hostname
-        username = "{0}@{1}".format(person.preferredUsername, hostname)
-        person = Person(
-            username=username,
-            name=person.name,
-            ap_id=person.id,
-            remote=True,
-        )
-        person.save()
-    return person
-
-
-def deliver(activity):
-    print("In deliver")
-    audience = activity.get_audience()
-    activity = activity.strip_audience()
-    audience = get_final_audience(audience)
-    for ap_id in audience:
-        print(ap_id)
-        deliver_to(ap_id, activity)
-
-
-def get_final_audience(audience):
-    final_audience = []
-    for ap_id in audience:
-        obj = dereference(ap_id)
-        if isinstance(obj, objects.Collection):
-            final_audience += [item.id for item in obj.items]
-        elif isinstance(obj, objects.Actor):
-            final_audience.append(obj.id)
-        # elif isinstance(obj, objects.Person):
-    print("Get Final audience")
-    print(final_audience)
-    return set(final_audience)
-
-
-def deliver_to(ap_id, activity):
-    obj = dereference(ap_id)
-    if not getattr(obj, "inbox", None):
-        return
-
-    res = requests.post(obj.inbox, json=activity.to_json(context=True))
-    if res.status_code != 200:
-        msg = "Failed to deliver activity {0} to {1}"
-        msg = msg.format(activity.type, obj.inbox)
-        raise Exception(msg)
-    print("Success deliver")
-
-
-def dereference(ap_id, type=None):
-    print(ap_id)
-    res = requests.get(ap_id, params={"get_json": "true"})
-
-    if res.status_code != 200:
-        raise Exception("Failed to dereference {0}".format(ap_id))
-
-    return json.loads(res.text, object_hook=as_activitystream)
 
 
 # @login_required(login_url="/")
@@ -330,7 +280,8 @@ def inbox_view(request, username):
             # return render(request, "note_view.html", context=data)
 
         _object = person.activities.filter(remote=True).order_by('-created_at')
-        collection = objects.OrderedCollection(_object).items
+        # collection = objects.OrderedCollection(_object).items
+        collection = objects.OrderedCollection(_object).to_json(context=True)["orderedItems"]
 
         data = {"user": person, "collection": collection}
         return render(request, "inbox.html", context=data)
@@ -345,7 +296,7 @@ def inbox_view(request, username):
     elif activity.type == "Follow":
         handle_follow(activity)
 
-    store(activity, person, remote=True)
+    outbox_deliver.store(activity, person, remote=True)
     return HttpResponse(f"<h2>Inbox</h2>")
 
 
@@ -358,7 +309,7 @@ def handle_note(activity):
     elif isinstance(activity.actor, str):
         ap_id = activity.actor
 
-    person = get_or_create_remote_person(ap_id)
+    person = outbox_deliver.get_or_create_remote_person(ap_id)
 
     try:
         note = Note.objects.get(ap_id=activity.object.id)
@@ -385,7 +336,7 @@ def handle_follow(activity):
     elif isinstance(activity.actor, str):
         ap_id = activity.actor
 
-    follower = get_or_create_remote_person(ap_id)
+    follower = outbox_deliver.get_or_create_remote_person(ap_id)
     followed.followers.add(follower)
 
 

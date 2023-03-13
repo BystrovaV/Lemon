@@ -26,6 +26,11 @@
 
 .close__img {
     position: absolute;
+    background: url("img/close.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
     width: 18px;
     height: 18px;
 
@@ -79,4 +84,42 @@ h2 {
     font-size: 20px;
     line-height: 23px;
     letter-spacing: 0.05em;
+}
+
+.btn__search {
+    background: url("img/loupe.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.btn {
+    width: 25px;
+    height: 25px;
+
+    cursor: pointer;
+    margin-left: 22px;
+    border: 0;
+    /* background:none; */
+}
+
+.btn-1 {
+    background: url("img/message.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.btn-2 {
+    background: url("img/right.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.btn-3 {
+    background: url("img/remove.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }

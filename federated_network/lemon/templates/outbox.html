@@ -16,6 +16,18 @@
         </div>
         <div class="page__body">
             <div class="filter__panel">
+                <div class="filter__item">
+                    <input type="checkbox" id="Create" onchange="filter(this)" checked="checked">
+                    <label for="create">Create</label>
+                </div>
+                <div class="filter__item">
+                    <input type="checkbox" id="Follow" onchange="filter(this)" checked="checked">
+                    <label for="follow">Follow</label>
+                </div>
+                <div class="filter__item">
+                    <input type="checkbox" id="Like" onchange="filter(this)" checked="checked">
+                    <label for="like">Like</label>
+                </div>      
             </div>
             <div>
                 {% for item in collection %}
@@ -36,10 +48,29 @@
     </div>
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
     <script>
+        var data = {{collection |safe}};
+
+        function filter(btn) {
+            if (btn.checked) {
+                data.forEach(item => {
+                    if (item.type == btn.id) {
+                        $(document.getElementById(item.id)).show();
+                    }
+                })
+            } else {
+                data.forEach(item => {
+                    if (item.type == btn.id) {
+                        $(document.getElementById(item.id)).hide();
+                    }
+                })
+            }
+        }
+
         $(".item").on('click', function () {
-            // alert($(this).attr('id'));
+            alert($(this).attr('id'));
             window.location.href = $(this).attr('id');
         });
+        
     </script>
 </body>
 </html>

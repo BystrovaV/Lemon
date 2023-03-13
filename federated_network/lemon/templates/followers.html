@@ -21,11 +21,13 @@
                     
                     <div class="search__inner">
                         <div class="search__wrap">
-                            <img class="close__img" src="{% static 'lemon/img/close.png' %}"/>
+                            <!-- <img class="close__img" src="{% static 'lemon/img/close.png' %}"/> -->
+                            <div class="close__img"></div>
                             <input name="search" id="search" placeholder="Search" class="search" value="{{ search |safe}}"/>
                         </div>
                         <button class="btn__submit">
-                            <img class="btn__search img" src="{% static 'lemon/img/loupe.png' %}"/>
+                            <!-- <img class="btn__search img" src="{% static 'lemon/img/loupe.png' %}"/> -->
+                            <div class="btn__search img"></div>
                         </button>
                     </div>
                 <!-- </form> -->
@@ -39,6 +41,9 @@
                     </div>
                     <!-- <p>{{ follower.id | safe}}</p> -->
                     <div class="btns">
+                        <!-- <button class="btn btn-1"></button>
+                        <button class="btn btn-2"></button>
+                        <button class="btn btn-3"></button> -->
                         <img class="img" src="{% static 'lemon/img/message.png' %}">
                         <img class="img" src="{% static 'lemon/img/right.png' %}">
                         <img class="img" src="{% static 'lemon/img/remove.png' %}">
@@ -73,6 +78,8 @@
                         
                 });
             });
+
+            
         });
     </script>
 </body>

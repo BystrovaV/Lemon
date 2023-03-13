@@ -25,6 +25,7 @@ urlpatterns = [
     re_path(r'^@(\w+)/notes', views.notes_view, name="notes"),
     # re_path(r'^@(\w+)/inbox/(\w+)', views.activity, name="inbox_item"),
     re_path(r'^@(\w+)/inbox', views.inbox_view, name="inbox"),
+    # re_path(r'^@(\w+)/outbox/outbox-filter', views.outbox_filter, name="outbox-filter"),
     re_path(r'^@(\w+)/outbox/(\w+)', views.activity, name="activity"),
     re_path(r'^@(\w+)/outbox', views.outbox_view, name="outbox"),
     re_path(r'^@(\w+)/following', views.following_view, name="following"),
