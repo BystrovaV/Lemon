@@ -53,12 +53,24 @@ class Create(Activity):
 
 
 class Follow(Activity):
-
     type = "Follow"
+
+
+class Like(Activity):
+    type = "Like"
+
+class Delete(Activity):
+    type = "Delete"
+
+class Undo(Activity):
+    type = "Undo"
 
 
 ALLOWED_TYPES.update({
     "Activity": Activity,
     "Create": Create,
     "Follow": Follow,
+    "Like": Like,
+    "Delete": Delete,
+    "Undo": Undo,
 })

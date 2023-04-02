@@ -94,6 +94,7 @@ h2 {
 }
 
 .btn {
+    display: block;
     width: 25px;
     height: 25px;
 

@@ -82,6 +82,26 @@ h2 {
     background-color: var(--lilac-color);
 }
 
+/* ------------------------------- LIKE -------------------------- */
+.like_container {
+    font-size: 20px;
+    display: flex;
+    align-content: center;
+
+    position: absolute;
+    right: calc(33px + 2 * (15px + 25px));
+}
+
+.like_img {
+    width: 25px;
+    height: 25px;
+}
+
+.like_container_visitor {
+    position: absolute;
+    right: calc(33px);
+}
+
 /* ------------------------------- VISITOR HEADER -------------------------- */
 .btn-message {
     background: url("img/message.png");

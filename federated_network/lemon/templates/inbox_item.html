@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inbox</title>
+
+    <link rel="stylesheet" href={% static "lemon/variables.css" %}>
+    <link rel="stylesheet" href={% static "lemon/person-main.css" %}>
+    <link rel="stylesheet" href={% static "lemon/outbox_item.css" %}>
+</head>
+<body>
+    <div class="wrapper">
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar__inner">{%include 'navigation-bar.html'%}</div>
+        </div>
+        <div class="page__body">
+            <div class="note__container">
+                <div class="note__top-panel">
+                    <img src="{% static 'lemon/img/back-button.png' %}" class="btn-back"/>
+                    <div>
+                        {% if activity.type == "Create" %}
+                        {% if liked == 0%}
+                        <img class="notliked like__img" src="{% static 'lemon/img/heart.png' %}" post="{{ activity.id |safe}}">
+                        {% elif liked == 1%}
+                        <img class="liked like__img" src="{% static 'lemon/img/black_heart.png' %}" post="{{ activity.id |safe}}">
+                        {% endif %}
+                        {% endif %}
+                        <img src="{% static 'lemon/img/delete.png' %}" class="btn-delete"/>
+                    </div>
+                </div>
+                
+                <div class="note__user-info">
+                    <p class="header username">{{activity.actor |safe}}</p>
+
+                    <div class="user-to">
+                        <p>To:</p>
+                        {% for item in activity.to %}
+                        <div class="user-to__container">{{item |safe}}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <diV class="note__content">
+                    <textarea name="content" class="content" disabled="disabled">{{activity.object.content}}</textarea>
+                </diV>
+
+                <div class="note__bottom-panel">
+                    <div class="round-btn reply">
+                        <img src="{% static 'lemon/img/turn-left.png' %}" class="btn-reply"/>
+                        Reply
+                    </div>
+
+                    <div class="round-btn forward">
+                        <img src="{% static 'lemon/img/turn-right.png' %}" class="btn-forward"/>
+                        Forward
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script>
+        $(".like__img").click(function(){
+            event.cancelBubble = true;
+            if(event.stopPropagation) 
+                event.stopPropagation();
+
+            post_id = $(this).attr("post");
+            var elem = $(this);
+
+            console.log(post_id);
+            if (elem.attr("class").includes("notliked")) {
+                $.ajax(
+                {
+                    type:"GET",
+                    url: "/likepost",
+                    data:{
+                            post_id: post_id
+                    },
+                    success: function( data ) 
+                    {
+                        elem.removeClass("notliked");
+                        elem.addClass("liked");
+                        elem.attr("src", "../static/lemon/img/black_heart.png");
+                    }
+                })
+            }
+            else if (elem.attr("class").includes("liked")) {
+                $.ajax(
+                {
+                    type:"GET",
+                    url: "/undo-likepost",
+                    data:{
+                            post_id: post_id
+                    },
+                    success: function( data ) 
+                    {
+                        console.log("success");
+                        elem.removeClass("liked");
+                        elem.addClass("notliked");
+                        elem.attr("src", "../static/lemon/img/heart.png");
+                    }
+                })
+            }
+        });
+    </script>
+</body>
+</html>

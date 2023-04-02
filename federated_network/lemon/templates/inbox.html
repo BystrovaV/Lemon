@@ -41,6 +41,11 @@
                         </p>
                     </div>
                     <img class="remove__img" src="{% static 'lemon/img/remove.png' %}">
+
+                    <!-- {% if item.type == "Create" %}
+                    <img class="like__img" src="{% static 'lemon/img/heart.png' %}" id="like{{ item.id |safe}}" post="{{ item.id |safe}}">
+                    {% endif %} -->
+
                 </div>
             {% endfor %}
             </div>
@@ -49,6 +54,10 @@
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
     <script>
         $(".item").on('click', function () {
+            event.cancelBubble = true;
+            if(event.stopPropagation) 
+                event.stopPropagation();
+
             var str = $(this).attr('id');
             str = str.substring(7);
 

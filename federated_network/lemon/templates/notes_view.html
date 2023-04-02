@@ -12,7 +12,7 @@
     {% if permission == 0 %}
     <div class="header__container">
         <a class="create__a" href="{{person.uris.notes}}/note-create">
-            <img class="create__img" src="{% static 'css/img/create.png' %}">
+            <img class="create__img" src="{% static 'lemon/img/create.png' %}">
         </a>
         <h2>My Notes</h2>
     </div>
@@ -31,6 +31,13 @@
             {% if permission == 0 %}
             <img class="edit__img" src="{% static 'lemon/img/create.png' %}">
             <img class="remove__img" src="{% static 'lemon/img/remove.png' %}">
+            <div class="like_container">
+                <img class="like_img" src="{% static 'lemon/img/heart.png' %}">{{note.likes_cnt |safe}}
+            </div>
+            {% else %}
+            <div class="like_container like_container_visitor">
+                <img class="like_img" src="{% static 'lemon/img/heart.png' %}">{{note.likes_cnt |safe}}
+            </div>
             {% endif %}
 
             <div class="person__username">{{ person.username |safe}}</div>

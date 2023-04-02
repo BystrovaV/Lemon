@@ -2,12 +2,17 @@ import json
 from urllib.parse import urlparse
 
 import requests
+from django.shortcuts import get_object_or_404
 
 from lemon.activities.objects import as_activitystream
-from lemon.models import Person, Activity
+from lemon.models import Person, Activity, Note
 from lemon.activities import objects
 
 
+# если активити remote = false,
+# автоматически outbox/id = id
+# если remote = true
+# присваивается ap_id = ap_id (который со стороны remote=false)
 def store(activity, person, remote=False):
     payload = bytes(json.dumps(activity.to_json()), "utf-8")
     obj = Activity(payload=payload, person=person, remote=remote)
@@ -78,3 +83,31 @@ def dereference(ap_id, type=None):
         raise Exception("Failed to dereference {0}".format(ap_id))
 
     return json.loads(res.text, object_hook=as_activitystream)
+
+
+def get_if_like_by_activity(activity):
+    note = get_note_by_activity(activity=activity)
+    if note != None:
+        return note.likes.contains(activity.person)
+    
+
+def get_note_by_activity(activity):
+    payload = activity.to_activitystream()
+    if payload["type"] != "Create":
+        return
+    
+    payload = payload["object"]
+    if payload["type"] == "Note":
+        note_id = payload["id"]
+        note = get_object_or_404(Note, ap_id = note_id)
+        return note
+    
+
+def get_like_activity_by_person(person, note):
+    activities = Activity.objects.all().filter(person=person).order_by("-id")
+
+    for activity in activities:
+        activity_stream = activity.to_activitystream()
+        if activity_stream["type"] == "Like":
+            if activity_stream["object"] == note.ap_id:
+                return activity

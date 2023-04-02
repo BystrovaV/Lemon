@@ -41,7 +41,8 @@ class Person(Model):
             followers=uri("followers", self.username),
             outbox=uri("outbox", self.username),
             inbox=uri("inbox", self.username),
-            notes=uri("notes", self.username)
+            notes=uri("notes", self.username),
+            liked=uri("liked", self.username)
         )
 
     def to_activitystream(self):
@@ -57,7 +58,8 @@ class Person(Model):
                 "following": self.uris.following,
                 "followers": self.uris.followers,
                 "outbox": self.uris.outbox,
-                "inbox": self.uris.inbox
+                "inbox": self.uris.inbox,
+                "liked": self.uris.liked
             })
 
         return json_format
