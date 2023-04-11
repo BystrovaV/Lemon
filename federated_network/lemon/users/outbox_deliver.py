@@ -101,6 +101,7 @@ def get_note_by_activity(activity):
         note_id = payload["id"]
         note = get_object_or_404(Note, ap_id = note_id)
         return note
+    return None
     
 
 def get_like_activity_by_person(person, note):
@@ -111,3 +112,4 @@ def get_like_activity_by_person(person, note):
         if activity_stream["type"] == "Like":
             if activity_stream["object"] == note.ap_id:
                 return activity
+            

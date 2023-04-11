@@ -25,7 +25,7 @@
                 <input type="submit" value="Create" /> -->
         
                 <div class="note__container">
-                    <div class="person__username">{{ person.username |safe}}</div>
+                    <div class="person__username">{{ user.username |safe}}</div>
                     <div class="reciever__username">
                         <div class="reciever__input__wrap">
                             <p>To:</p>
@@ -40,6 +40,13 @@
                                 onclick="deleteReciever(this)"/>
                             </div>
                            
+                            {% if to != "undefined" %}
+                            <div class="reciever" style="display: flex; visibility: visible;">
+                                <input name="reciever" class="reciever__output" value="{{to |safe}}" readonly/>
+                                <img src="{% static 'lemon/img/remove.png' %}" class="remove__img"
+                                onclick="deleteReciever(this)"/>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="note__content__wrap">
@@ -76,7 +83,7 @@
      
         function deleteReciever(button) {
             var reciever = button.parentNode;
-            alert(reciever)
+            // alert(reciever)
             var recievers = reciever.parentNode;
             recievers.removeChild(reciever);
         }

@@ -5,6 +5,10 @@
     border-radius: 21px;
 }
 
+.person__username {
+    font-size: 20px;
+}
+
 .note__content__wrap {
     background-color: whitesmoke;
     height: 50vh;

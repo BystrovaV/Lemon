@@ -31,11 +31,12 @@ urlpatterns = [
     re_path(r'^@(\w+)/liked', views.liked_view, name="liked"),
     re_path(r'^@(\w+)/following', views.following_view, name="following"),
     re_path(r'^@(\w+)/followers', views.followers_view, name="followers"),
-    re_path(r'^@(\w+)/follow/', views.following_action),
+    re_path(r'follow/', views.following_action),
     re_path(r'^@([^/]+)$', views.person_main, name="person"),
     path("undo-likepost/", views.undo_likepost, name="undo_likepost"),
     path("likepost/", views.likepost, name="likepost"),
     path("sign-up/", views.sign_up, name="sign-up"),
     path("logout/", views.logout_view, name="logout"),
+    # path("about/", name="about"),
     path("", views.sign_in, name="sign-in"),
 ]

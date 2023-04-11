@@ -44,12 +44,17 @@
         justify-content: space-between;
         height: 70%;
     }
+
+    .visitor {
+        height: 25%;
+    }
     /* .navigation__container__inner {
         width: 210px;
     } */
 </style>
 <div class="navigation__container" >
     <!-- <div class="navigation__container__inner"> -->
+        {% if user != None %}
         <ul class="navigation__list">
             <li class="navigation__item logo">LEMON</li>
             <li class="navigation__item"><a href="{{user.uris.id}}">My Profile</a></li>
@@ -60,5 +65,12 @@
             <li class="navigation__item"><a href="{{user.uris.outbox}}">Settings</a></li>
             <li class="navigation__item quit"><a href="../logout/">Quit</a></li>
         </ul>
+        {% elif user == None %}
+        <ul class="navigation__list visitor">
+            <li class="navigation__item logo">LEMON</li>
+            <li class="navigation__item"><a href="../.">Sign In</a></li>
+            <li class="navigation__item"><a href="../sign-up/">Sign Up</a></li>
+        </ul>
+        {% endif %}
     <!-- </div> -->
 </div>

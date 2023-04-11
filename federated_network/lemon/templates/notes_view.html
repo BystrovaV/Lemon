@@ -16,10 +16,15 @@
         </a>
         <h2>My Notes</h2>
     </div>
-    {% elif permission == 1 %}
+    {% else %}
     <div class="header__container">
-        <div class="btn-friend btn-rose btn-font-small">Become a Friends</div>
-        <div class="btn-message"></div>
+        {% if permission == 2 %}
+        <div class="btn-friend btn-rose btn-font-small" onclick="follow(this)">Follow</div>
+        <button class="btn-message" onclick="message()"></button>
+        {% elif permission == 1 %}
+        <div class="btn-friend btn-disabled btn-font-small">You're Following</div>
+        <button class="btn-message" onclick="message()"></button>
+        {% endif %}
         <h2>{{person.username |safe}}</h2>
     </div>
     {% endif %}
@@ -41,10 +46,18 @@
             {% endif %}
 
             <div class="person__username">{{ person.username |safe}}</div>
-            <div class="creation__date">creation date</div>
-            <div class="reciever__username"><p>To:</p>
-                <p>Reciever username</p>
+            <div class="creation__date">{{ note.created_at |safe}}</div>
+            {% if permission == 0 %}
+            <div class="reciever__username"><p>To:<br>
+                {% if note.to|length == 0%}
+                    All Followers
+                {% endif %}
+                {% for reciever in note.to %}
+                    {{ reciever |safe }}<br>
+                {% endfor %}
+            </p>
             </div>
+            {% endif %}
             <div class="note__content__wrap">
                 <div class="note__content">
                     {{ note.content |safe }}
@@ -53,5 +66,43 @@
         </div>
         {% endfor %}
     </div>
+    <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script>
+        var user_uri = "{{user.uris.id}}";
+        var person_uri = "{{person.username}}";
+
+        function message() {
+            event.cancelBubble = true;
+            if(event.stopPropagation) 
+                event.stopPropagation();
+
+            // console.log(user_uri);
+            path = user_uri + "/notes/note-create?to=" + person_uri;
+            // alert(path);
+            window.location.href = path;
+        };
+
+        function follow(elem) {
+            event.cancelBubble = true;
+            if(event.stopPropagation) 
+                event.stopPropagation();
+
+            $.ajax(
+            {
+                type:"GET",
+                url: "/follow",
+                data:{
+                        followed_id: person_uri
+                },
+                success: function( data ) 
+                {
+                    elem.innerText = "You're Following";
+                    elem.classList.remove("btn-rose");
+                    elem.classList.add("btn-disabled");
+                    elem.removeAttribute("onclick");
+                }
+            })
+        }
+    </script>
 </body>
 </html>

@@ -1,9 +1,9 @@
-.item:nth-child(odd) {
+.item1 {
     background-color: var(--yellow-color);
     margin: 21px 0;
 }
 
-.item:nth-child(even) {
+.item0 {
     background-color: var(--lilac-color);
 }
 

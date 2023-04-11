@@ -32,15 +32,15 @@
             </div>
             <div>
                 {% for follow in following %}
-                <div class="item" id="{{ follower.preferredUsername |safe}}">
+                <div class="item" id="{{ follow.preferredUsername |safe}}">
                     <div class="item__left">
                         <h2 class="item__name">{{ follow.name |safe}}</h2>
                         <p class="item__id">{{ follow.preferredUsername |safe}}</p>
                     </div>
                     <!-- <p>{{ follower.id | safe}}</p> -->
                     <div class="btns">
-                        <img class="img" src="{% static 'lemon/img/message.png' %}">
-                        <img class="img" src="{% static 'lemon/img/right.png' %}">
+                        <img class="img message" src="{% static 'lemon/img/message.png' %}">
+                        <img class="img visit" id="visit{{follow.id |safe}}" src="{% static 'lemon/img/right.png' %}">
                         <img class="img" src="{% static 'lemon/img/remove.png' %}">
                     </div>
                 </div>
@@ -60,6 +60,14 @@
                 });
             });
 
+            $(".close__img").on('click', function () {
+                event.cancelBubble = true;
+                if(event.stopPropagation) 
+                    event.stopPropagation();
+                
+                document.getElementById("search").value = "";
+            });
+
             $(".btn__search").on('click', function () {
                 var search = $('#search').val();
                 // var s = "duhfjsd".search
@@ -73,6 +81,29 @@
                     }
                         
                 });
+            });
+
+            var user_uri = "{{user.uris.id}}";
+
+            $(".message").on('click', function() {
+                event.cancelBubble = true;
+                if(event.stopPropagation) 
+                    event.stopPropagation();
+
+                path = user_uri + "/notes/note-create?to=" + 
+                    $(this).parent(".btns").parent(".item").attr("id");
+
+                window.location.href = path;
+            });
+
+            $(".visit").on('click', function() {
+                console.log("great");
+                person_uri = $(this).attr("id");
+                if (person_uri.startsWith("visit")) {
+                    person_uri = person_uri.substring(5);
+                    window.open(person_uri);
+                }
+                
             });
         });
     </script>

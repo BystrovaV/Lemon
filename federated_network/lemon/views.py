@@ -1,12 +1,9 @@
 import json
-from urllib.parse import urlparse
-from django import http
 
 import requests
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from lemon.activities.objects import as_activitystream
@@ -17,7 +14,6 @@ import lemon.users.users_checks as users_checks
 import lemon.users.outbox_deliver as outbox_deliver
 
 from django.contrib.auth import authenticate, login, logout
-from django.template.loader import render_to_string
 
 
 # вход в систему
@@ -68,26 +64,15 @@ def person_main(request, username):
         return JsonResponse(objects.Actor(person).to_json(context=True))
 
     if not request.user.is_authenticated:
-        return HttpResponseRedirect("/")
+        user = None
+    else:
+        user = get_object_or_404(Person, username=request.user)
+        # return HttpResponseRedirect("/")
 
-    permission = users_checks.is_visitor(request.user, username)
-    user = get_object_or_404(Person, username=request.user)
-
-    # collection = objects.OrderedCollection(
-    #     person.notes.all(),
-    #     id=person.uris.notes
-    # ).items
-
-    notes = person.notes.all()
-    collection = []
-    for note in notes:
-        likes_cnt = note.likes.count()
-        likes_people = note.likes.all()
-        note = note.to_activitystream()
-        note["likes_cnt"] = likes_cnt
-        note["likes_people"] = list(map(lambda x: x.to_activitystream(), likes_people))
-        collection.append(note)
-    print(collection)
+    permission = users_checks.is_visitor_main(user, person)
+    # collection = users_checks.person_get_notes(person)
+    collection = users_checks.person_get_all_notes(person, permission)
+    # print(collection)
 
     data = {"person": person, "user": user, "notes": collection, "permission": permission}
     return render(request, "person-main.html", context=data)
@@ -104,7 +89,9 @@ def following_view(request, username):
         return users_checks.response_error()
 
     user = get_object_or_404(Person, username=username)
-    following = objects.OrderedCollection(user.following.all()).items
+    # following = objects.OrderedCollection(user.following.all()).items
+    following = user.following.all()
+    following = list(map(lambda x: x.to_activitystream(), following))
 
     # create_like()
     # return JsonResponse(following.to_json(context=True))
@@ -116,27 +103,17 @@ def liked_view(request, username):
     following = objects.OrderedCollection(user.following.all()).items
     return JsonResponse(following.to_json(context=True))
 
-# def create_like():
-#     activity = get_object_or_404(Activity, ap_id="http://alice.local/@Alice/outbox/21")
-#     to = activity.to_activitystream()["actor"]
-#     person = get_object_or_404(Person, username="bob_the_first")
-#     like = verbs.Like( 
-#                       to=[to], 
-#                       actor=person.ap_id, 
-#                       object=activity.ap_id)
-#     print(like.to_json(context=True))
-#     print("Make POST")
-#     requests.post(person.uris.outbox, json=like.to_json())
 
 def likepost(request):
     if request.method == 'GET':
+        person = get_object_or_404(Person, username=request.user)
+
         activity_id = request.GET['post_id']
-        activity = get_object_or_404(Activity, ap_id=activity_id)
+        activity = get_object_or_404(Activity, ap_id=activity_id, person=person)
 
         note = outbox_deliver.get_note_by_activity(activity)
 
         to = activity.to_activitystream()["actor"]
-        person = get_object_or_404(Person, username=request.user)
 
         like = verbs.Like( 
                       to=[to], 
@@ -150,11 +127,12 @@ def likepost(request):
 
 def undo_likepost(request):
     if request.method == 'GET':
+        person = get_object_or_404(Person, username=request.user)
+
         activity_id = request.GET['post_id']
-        activity = get_object_or_404(Activity, ap_id=activity_id)
+        activity = get_object_or_404(Activity, ap_id=activity_id, person=person)
 
         note = outbox_deliver.get_note_by_activity(activity)
-        person = get_object_or_404(Person, username=request.user)
         
         like_activity = outbox_deliver.get_like_activity_by_person(person, note)
         undo = verbs.Undo(actor=person.ap_id, 
@@ -185,22 +163,35 @@ def undo_likepost(request):
 #  "object": "https://chatty.example/ben/p/51086"}
 
 
-def following_action(request, username):
-    person = get_object_or_404(Person, username=username)
+def following_action(request):
+    if request.method == 'GET':
+        user = get_object_or_404(Person, username=request.user)
+        followed = get_object_or_404(Person, username=request.GET['followed_id'])
 
-    # TODO: add follow for another server (check)
-    username_to = request.POST.get("username", "Undefined")
-    instance = request.POST.get("instance", "Undefined")
+        follow = verbs.Follow(object=followed.uris.id)
+        print(follow.to_json())
+        print(followed.ap_id)
+        response = requests.post(user.uris.outbox, json=follow.to_json())
+        return HttpResponse(response)
+    return HttpResponse()
 
-    if instance != "":
-        str_path = "http://{domain}/@{path}".format(domain=instance, path=username_to)
-        follow = verbs.Follow(object=str_path)
-    else:
-        person_to = get_object_or_404(Person, username=username_to)
-        follow = verbs.Follow(object=person_to.uris.id)
 
-    requests.post(person.uris.outbox, json=follow.to_json())
-    return HttpResponseRedirect(f"/@{person.username}/following")
+# def following_action(request, username):
+#     person = get_object_or_404(Person, username=username)
+
+#     # TODO: add follow for another server (check)
+#     username_to = request.POST.get("username", "Undefined")
+#     instance = request.POST.get("instance", "Undefined")
+
+#     if instance != "":
+#         str_path = "http://{domain}/@{path}".format(domain=instance, path=username_to)
+#         follow = verbs.Follow(object=str_path)
+#     else:
+#         person_to = get_object_or_404(Person, username=username_to)
+#         follow = verbs.Follow(object=person_to.uris.id)
+
+#     requests.post(person.uris.outbox, json=follow.to_json())
+#     return HttpResponseRedirect(f"/@{person.username}/following")
 
 
 # @login_required(login_url="/")
@@ -228,22 +219,6 @@ def followers_view(request, username):
         return render(request, "followers.html", context={"user":user, "followers": user_followers, "search": ""})
 
 
-# def outbox_filter(request, username):
-#     print("outbox_filter")
-#     user = get_object_or_404(Person, username=request.GET.get('username', None))
-#     _object = user.activities.filter(remote=False).order_by('-created_at')
-#     collection = objects.OrderedCollection(_object).to_json(context=True)
-
-#     # collection["orderedItems"] = list(filter(lambda x: x['type'] == 'Create', 
-#                                             #  collection["orderedItems"]))
-
-#     data = {"user": user, "collection": collection}
-
-#     print(render_to_string('outbox.html',
-#         data, request=request))
-#     return JsonResponse(data)
-
-
 # @login_required(login_url="/")
 @csrf_exempt
 def outbox_view(request, username):
@@ -258,7 +233,7 @@ def outbox_view(request, username):
         
         user = get_object_or_404(Person, username=request.user)
         
-        _object = user.activities.filter(remote=False).order_by('-created_at')
+        _object = user.activities.filter(remote=False).order_by('-id')
 
         collection = objects.OrderedCollection(_object).to_json(context=True)["orderedItems"]
         # collection = list(map(lambda x: x.to_json(), collection))
@@ -304,7 +279,7 @@ def outbox_view(request, username):
     if activity.type == "Undo":
         print("In undo body")
 
-        object_activity = get_object_or_404(Activity, ap_id=activity.object).to_activitystream()
+        object_activity = get_object_or_404(Activity, ap_id=activity.object, person=person).to_activitystream()
         if (object_activity["type"] == "Like"):
             liked_note = get_object_or_404(Note, ap_id=object_activity["object"])
             person.liked.remove(liked_note)
@@ -399,7 +374,7 @@ def inbox_view(request, username):
         if hostname != "undefined" and actor != "undefined" and _id != -1 and domen != "undefined":
             ap_id = "http://" + hostname + "." + domen + "/" + actor + "/outbox/" + _id
             # print(ap_id)
-            activity = Activity.objects.get(ap_id=ap_id)
+            activity = Activity.objects.get(ap_id=ap_id, person=person)
             liked = outbox_deliver.get_if_like_by_activity(activity)
 
             payload = activity.payload.decode("utf-8")
@@ -409,7 +384,7 @@ def inbox_view(request, username):
             # return JsonResponse(activity.to_json(context=True))
             # return render(request, "note_view.html", context=data)
 
-        _object = person.activities.filter(remote=True).order_by('-created_at')
+        _object = person.activities.filter(remote=True).order_by('-id')
         collection = objects.OrderedCollection(_object).to_json(context=True)["orderedItems"]
 
         data = {"user": person, "collection": collection}
@@ -427,7 +402,7 @@ def inbox_view(request, username):
         handle_like(activity)
     elif activity.type == "Undo":
         print("inbox undo")
-        handle_undo(activity)
+        handle_undo(activity, person)
 
     outbox_deliver.store(activity, person, remote=True)
     return HttpResponse(f"<h2>Inbox</h2>")
@@ -492,7 +467,7 @@ def handle_like(activity):
     # outbox_deliver.deliver(activity)
 
 
-def handle_undo(activity):
+def handle_undo(activity, person):
     who_liked = outbox_deliver.get_or_create_remote_person(ap_id = activity.actor)
 
     if isinstance(activity.actor, objects.Actor):
@@ -500,7 +475,7 @@ def handle_undo(activity):
     elif isinstance(activity.actor, str):
         ap_id = activity.actor
 
-    object_activity = get_object_or_404(Activity, ap_id=activity.object).to_activitystream()
+    object_activity = get_object_or_404(Activity, ap_id=activity.object, person=person).to_activitystream()
     if (object_activity["type"] == "Like"):
         print("try to remove")
         get_object_or_404(Note, ap_id=object_activity["object"]).likes.remove(who_liked)
@@ -538,8 +513,14 @@ def note_view(request, username, note_id):
 
 # @login_required(login_url="/")
 def note_create(request, username):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect("/")
+    
     person = get_object_or_404(Person, username=username)
-    return render(request, "note_create.html")
+
+    to_id = request.GET.get("to", "undefined")
+    print(to_id)
+    return render(request, "note_create.html", context={"user": person, "to": to_id})
 
 
 # curl -X POST 'http://bob.local/@bob/outbox' -H
@@ -591,7 +572,7 @@ def note_create_validator(request, username):
     #     requests.post(person.uris.outbox, json=note.to_json())
     # else:
     
-    return HttpResponseRedirect(f"{person.uris.notes}")
+    return HttpResponseRedirect(f"{person.uris.id}")
 
 def logout_view(request):
     logout(request)

@@ -43,6 +43,13 @@ html{
     cursor: pointer;
 }
 
+.btn-disabled {
+    background-color: var(--yellow-color);
+    border-radius: 5px;
+    border: 3px;
+    padding: 7px 51px;
+}
+
 .btn-font-big {
     font-size: 18px;
     line-height: 23px;

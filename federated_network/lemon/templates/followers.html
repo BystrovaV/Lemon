@@ -39,13 +39,9 @@
                         <h2 class="item__name">{{ follower.name |safe}}</h2>
                         <p class="item__id">{{ follower.preferredUsername |safe}}</p>
                     </div>
-                    <!-- <p>{{ follower.id | safe}}</p> -->
                     <div class="btns">
-                        <!-- <button class="btn btn-1"></button>
-                        <button class="btn btn-2"></button>
-                        <button class="btn btn-3"></button> -->
-                        <img class="img" src="{% static 'lemon/img/message.png' %}">
-                        <img class="img" src="{% static 'lemon/img/right.png' %}">
+                        <img class="img message" src="{% static 'lemon/img/message.png' %}">
+                        <img class="img visit" id="visit{{follower.id |safe}}" src="{% static 'lemon/img/right.png' %}">
                         <img class="img" src="{% static 'lemon/img/remove.png' %}">
                     </div>
                 </div>
@@ -58,28 +54,56 @@
         $(document).ready(function () {
             var data = {{ followers |safe}};
            
-            $("#search").on('click', function () {
+            $(".close__img").on('click', function () {
+                event.cancelBubble = true;
+                if(event.stopPropagation) 
+                    event.stopPropagation();
+                
+                document.getElementById("search").value = "";
+                showAll();
+            });
+
+            $("#search").on('click', showAll);
+
+            function showAll() {
                 data.forEach(item => {
                     $(document.getElementById(item.preferredUsername)).show(); 
                 });
-            });
+            }
 
             $(".btn__search").on('click', function () {
                 var search = $('#search').val();
-                // var s = "duhfjsd".search
-                // alert(data);
 
                 data.forEach(item => {
                     if (!item.name.includes(search) && !item.preferredUsername.includes(search)) {
-                        // var index = ;
-                        // var div = $("#" + item.preferredUsername);
                         $(document.getElementById(item.preferredUsername)).hide();
                     }
                         
                 });
             });
 
-            
+            var user_uri = "{{user.uris.id}}";
+
+            $(".message").on('click', function() {
+                event.cancelBubble = true;
+                if(event.stopPropagation) 
+                    event.stopPropagation();
+
+                path = user_uri + "/notes/note-create?to=" + 
+                    $(this).parent(".btns").parent(".item").attr("id");
+
+                window.location.href = path;
+            });
+
+            $(".visit").on('click', function() {
+                // console.log("great");
+                person_uri = $(this).attr("id");
+                if (person_uri.startsWith("visit")) {
+                    person_uri = person_uri.substring(5);
+                    window.open(person_uri);
+                }
+                
+            });
         });
     </script>
 </body>

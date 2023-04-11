@@ -27,11 +27,15 @@
                 <div class="filter__item">
                     <input type="checkbox" id="Like" onchange="filter(this)" checked="checked">
                     <label for="like">Like</label>
-                </div>      
+                </div>     
+                <div class="filter__item">
+                    <input type="checkbox" id="Undo" onchange="filter(this)" checked="checked">
+                    <label for="undo">Undo</label>
+                </div>   
             </div>
             <div>
                 {% for item in collection %}
-                <div class="item" id="{{ item.id |safe}}">
+                <div class="item item{% if forloop.counter0|divisibleby:2 %}1{% else %}0{% endif %}" id="{{ item.id |safe}}">
                     <div class="item__left">
                         <h2 class="item__type">{{ item.type |safe }}</h2>
                         <p class="item__to">{{ item.to |safe}}</p>
@@ -51,23 +55,49 @@
         var data = {{collection |safe}};
 
         function filter(btn) {
+            var i, temp = 0;
             if (btn.checked) {
-                data.forEach(item => {
-                    if (item.type == btn.id) {
-                        $(document.getElementById(item.id)).show();
+                for (i = 0; i < data.length; i++) {
+                    var item =  $(document.getElementById(data[i].id));
+                    if (data[i].type == btn.id) {
+                       item.show();
                     }
-                })
+
+                    if (item.is(":visible")) {
+                        if (temp % 2 == 0) {
+                            item.removeClass("item0");
+                            item.addClass("item1");
+                        } else {
+                            item.removeClass("item1");
+                            item.addClass("item0");
+                        }
+                        temp++;
+                    }
+                }
+
             } else {
-                data.forEach(item => {
-                    if (item.type == btn.id) {
-                        $(document.getElementById(item.id)).hide();
+                for (i = 0; i < data.length; i++) {
+                    if (data[i].type == btn.id) {
+                        $(document.getElementById(data[i].id)).hide();
+                    } else {
+                        var item = $(document.getElementById(data[i].id));
+                        if (item.is(":visible")) {
+                            if (temp % 2 == 0) {
+                                item.removeClass("item0");
+                                item.addClass("item1");
+                            } else {
+                                item.removeClass("item1");
+                                item.addClass("item0");
+                            }
+                            temp++;
+                        }
                     }
-                })
+                }
             }
         }
 
         $(".item").on('click', function () {
-            alert($(this).attr('id'));
+            // alert($(this).attr('id'));
             window.location.href = $(this).attr('id');
         });
         
