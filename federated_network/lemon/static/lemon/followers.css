@@ -26,10 +26,10 @@
 
 .close__img {
     position: absolute;
-    background: url("img/close.png");
+    /* background: url("img/close.png");
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
+    background-repeat: no-repeat; */
 
     width: 18px;
     height: 18px;
@@ -38,17 +38,21 @@
     cursor: pointer;
 }
 
+.add__img {
+    position: absolute;
+}
+
 .btn__submit {
     background-color: var(--lilac-color);
     border: 0;
 }
 
-.item:nth-child(odd) {
+.item1 {
     background-color: var(--yellow-color);
     margin: 20px 0px;
 }
 
-.item:nth-child(even) {
+.item0 {
     margin: 20px 0px;
     background-color: var(--lilac-color);
 }
@@ -78,6 +82,14 @@
     margin-left: 22px;
 }
 
+.host {
+    font-style:normal;
+    font-weight:bold;
+    font-size: 20px;
+    line-height: 23px;
+    letter-spacing: 0.05em;
+}
+
 h2 {
     font-style: normal;
     font-weight: 400;
@@ -86,12 +98,12 @@ h2 {
     letter-spacing: 0.05em;
 }
 
-.btn__search {
+/* .btn__search {
     background: url("img/loupe.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-}
+} */
 
 .btn {
     display: block;
@@ -124,3 +136,31 @@ h2 {
     background-position: center;
     background-repeat: no-repeat;
 }
+
+/*--------------------------- FOLLOW ADD -------------------------------*/
+.form-wrap {
+    display: none;
+    position: absolute;
+    text-align: center;
+    width: 100vw;
+    top: 0;
+    height: 100vh;
+
+    background-color: rgba(159, 148, 175, 0.5);
+    /* z-index: 2; */
+}
+
+.form-popup {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid #999999;
+    z-index: 9;
+}
+
+/* .form-container {
+    max-width: 300px;
+    padding: 20px;
+    background-color: #fff;
+} */

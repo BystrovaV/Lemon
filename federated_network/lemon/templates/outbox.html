@@ -35,14 +35,22 @@
             </div>
             <div>
                 {% for item in collection %}
-                <div class="item item{% if forloop.counter0|divisibleby:2 %}1{% else %}0{% endif %}" id="{{ item.id |safe}}">
+                <div class="item item{% if forloop.counter0|divisibleby:2 %}1{% else %}0{% endif %} 
+                {% if item.type == 'Create' %}create{% endif %}" id="{{ item.id |safe}}">
                     <div class="item__left">
                         <h2 class="item__type">{{ item.type |safe }}</h2>
-                        <p class="item__to">{{ item.to |safe}}</p>
+                        <p class="item__to">{{ item.actor |safe}}</p>
                     </div>
                     <div class="item__content__wrap">
-                        <p class="item__content">{{ item.object.content |safe}}
-                        </p>
+                        {% if item.type == 'Create' %}
+                        <p class="item__content">{{ item.object.content |safe}}</p>
+                        {% elif item.type == 'Follow' %}
+                        <p class="item__content"> You followed {{item.object}}!</p>
+                        {% elif item.type == 'Like' %}
+                        <p class="item__content">You liked post<br>{{item.object}}!</p>
+                        {% elif item.type == 'Undo' %}
+                        <p class="item__content"> You don't like post<br>{{item.object}} anymore!</p>
+                        {% endif %}
                     </div>
                     <img class="remove__img" src="{% static 'lemon/img/remove.png' %}">
                 </div>
@@ -96,7 +104,7 @@
             }
         }
 
-        $(".item").on('click', function () {
+        $(".create").on('click', function () {
             // alert($(this).attr('id'));
             window.location.href = $(this).attr('id');
         });

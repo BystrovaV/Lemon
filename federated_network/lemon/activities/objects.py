@@ -3,7 +3,7 @@ from django.contrib.sites import requests
 
 
 class Object(object):
-    attributes = ["type", "id", "name", "to"]
+    attributes = ["type", "id", "name", "to", "bto", "bcc", "cc"]
     type = "Object"
 
     @classmethod
@@ -44,16 +44,20 @@ class Object(object):
             # if getattr(value, "__iter__", None):
             #     value = [item.to_json() for item in value]
             values[attribute] = value
-        to = values.get("to")
-        if isinstance(to, str):
-            values["to"] = [to]
-        elif getattr(to, "__iter__", None):
-            values["to"] = []
-            for item in to:
-                if isinstance(item, str):
-                    values["to"].append(item)
-                if isinstance(item, Object):
-                    values["to"].append(item.id)
+        get_from_array(values, "to")
+        get_from_array(values, "bto")
+        get_from_array(values, "bcc")
+        get_from_array(values, "cc")
+        # to = values.get("to")
+        # if isinstance(to, str):
+        #     values["to"] = [to]
+        # elif getattr(to, "__iter__", None):
+        #     values["to"] = []
+        #     for item in to:
+        #         if isinstance(item, str):
+        #             values["to"].append(item)
+        #         if isinstance(item, Object):
+        #             values["to"].append(item.id)
 
         if context:
             values["@context"] = "https://www.w3.org/ns/activitystreams"
@@ -61,6 +65,19 @@ class Object(object):
 
     def to_activitystream(self):
         return self
+
+
+def get_from_array(values, title):
+    arr = values.get(title)
+    if isinstance(arr, str):
+        values[title] = [arr]
+    elif getattr(arr, "__iter__", None):
+        values[title] = []
+        for item in arr:
+            if isinstance(item, str):
+                values[title].append(item)
+            if isinstance(item, Object):
+                values[title].append(item.id)
 
 
 class Note(Object):

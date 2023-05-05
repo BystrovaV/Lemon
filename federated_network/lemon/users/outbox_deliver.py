@@ -41,6 +41,7 @@ def get_or_create_remote_person(ap_id):
 def deliver(activity):
     print("In deliver")
     audience = activity.get_audience()
+    # strip_audience убирают из получателей bto, bcc
     activity = activity.strip_audience()
     audience = get_final_audience(audience)
     for ap_id in audience:

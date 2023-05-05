@@ -2,8 +2,11 @@ import json
 
 import requests
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
+from django.utils import timezone
+import time
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from lemon.activities.objects import as_activitystream
@@ -18,6 +21,7 @@ from django.contrib.auth import authenticate, login, logout
 
 # вход в систему
 def sign_in(request):
+    data = {}
     if request.method == 'POST':
         username=request.POST.get("username", "Undefined")
         password=request.POST.get("password", "Undefined")
@@ -26,7 +30,9 @@ def sign_in(request):
         if user is not None:
             login(request, user=user)
             return HttpResponseRedirect(f"/@{username}")
-    return render(request, 'sign-in.html')
+        else:
+            data = {"error": "Wrong username or password"}
+    return render(request, 'sign-in.html', context=data)
 
 
 def sign_up(request):
@@ -46,13 +52,20 @@ def sign_up(request):
             if user is not None:
                 login(request, user=user)
                 return HttpResponseRedirect(f"/@{username}")
-        else:
-            # TODO: validate mistakes
-            print("phhhh....")
-        	# messages.success(request, f'Создан аккаунт {username}!')
     else:
         form = UserRegisterForm()
     return render(request, 'sign-up.html', {'form': form})
+
+
+def about(request):
+    if not request.user.is_authenticated:
+        user = None
+    else:
+        user = get_object_or_404(Person, username=request.user)
+    
+    permission = users_checks.is_visitor_main(user, None)
+    data = {"user": user, "permission": permission, "hosts": users_checks.get_users_by_hosts(user)}
+    return render(request, "about.html", context=data)
 
 
 # главная страница пользователя
@@ -72,7 +85,7 @@ def person_main(request, username):
     permission = users_checks.is_visitor_main(user, person)
     # collection = users_checks.person_get_notes(person)
     collection = users_checks.person_get_all_notes(person, permission)
-    # print(collection)
+    print(collection)
 
     data = {"person": person, "user": user, "notes": collection, "permission": permission}
     return render(request, "person-main.html", context=data)
@@ -166,11 +179,16 @@ def undo_likepost(request):
 def following_action(request):
     if request.method == 'GET':
         user = get_object_or_404(Person, username=request.user)
-        followed = get_object_or_404(Person, username=request.GET['followed_id'])
 
-        follow = verbs.Follow(object=followed.uris.id)
-        print(follow.to_json())
-        print(followed.ap_id)
+        if 'followed_id' in request.GET:
+            follow = verbs.Follow(object=request.GET['followed_id'])
+        elif 'followed_username' in request.GET:
+            followed = get_object_or_404(Person, username=request.GET['followed_username'])
+            follow = verbs.Follow(object=followed.uris.id)
+        else:
+            pass
+        # print(follow.to_json())
+        # print(followed.ap_id)
         response = requests.post(user.uris.outbox, json=follow.to_json())
         return HttpResponse(response)
     return HttpResponse()
@@ -388,6 +406,7 @@ def inbox_view(request, username):
         collection = objects.OrderedCollection(_object).to_json(context=True)["orderedItems"]
 
         data = {"user": person, "collection": collection}
+        print(data)
         return render(request, "inbox.html", context=data)
 
     payload = request.body.decode("utf-8")
@@ -538,25 +557,29 @@ def note_create_validator(request, username):
     person = get_object_or_404(Person, username=username)
 
     # TODO: for all followers
-    recievers = request.POST.getlist("reciever", ["python"])
+    recievers = request.POST.getlist("reciever", [])
     
-    print(request.POST)
+    # print(request.POST)
     content = request.POST.get("content", "Undefined")
 
     audience = []
     for reciever in recievers:
         # person1 = get_object_or_404(Person, username=reciever)
         try:
-            print(reciever)
+            # print(reciever)
             person1 = Person.objects.get(username=reciever)
             audience.append(person1.uris.id)
         except ObjectDoesNotExist:
-            print("Объект не сушествует")
+            # print("Объект не сушествует")
             continue            
         except MultipleObjectsReturned:
-            print("Найдено более одного объекта")
+            # print("Найдено более одного объекта")
             continue
-        
+    
+    if len(audience) == 0:
+        audience.append(person.uris.followers)
+    
+    # print(audience)
     note = objects.Note(content=content)
     create = verbs.Create(to=audience, object=note, actor=person.uris.id)
     requests.post(person.uris.outbox, json=create.to_json())
@@ -577,3 +600,32 @@ def note_create_validator(request, username):
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect("/")
+
+
+# from datetime import datetime
+
+
+# @require_GET
+# def sse(request):
+#     response = StreamingHttpResponse(content_type='text/event-stream')
+#     person = get_object_or_404(Person, username=request.user)
+
+#     def stream():
+#         # updates = Activity.objects.filter(created_at__gt=datetime(2023, 1, 1, 0, 0, 0))
+#         # print(updates)
+#         # print("Hello")
+#         # yield b"data: Hello\n\n"
+#         # time.sleep(1)
+#         last_update_time = timezone.now()
+
+#         while True:
+#             inserts = person.activities.filter(remote=True, created_at__gt=last_update_time).order_by('-id')
+#             print(len(inserts))
+#             if len(inserts) > 0:
+#                 collection = objects.OrderedCollection(inserts).to_json(context=True)["orderedItems"]
+#                 yield f"data: {json.dumps(collection)}\n\n"
+#                 last_update_time = inserts.last().created_at
+#             time.sleep(10)
+
+#     response.streaming_content = stream()
+#     return response

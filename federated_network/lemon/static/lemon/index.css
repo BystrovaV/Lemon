@@ -57,11 +57,15 @@
     letter-spacing: 0.05em;
 }
 
+.field {
+    margin-top: 23px;
+    display: flex;
+    flex-direction: column;
+}
+
 .input__field {
     display:flex;
-
     justify-content: space-between;
-    margin-top: 23px;
 }
 
 .input__label {
@@ -79,7 +83,7 @@ input {
 .btn__rose {
     background-color: var(--rose-color);
     border-radius: 5px;
-    border: 0;
+    border: 1px solid #000000;
     padding: 7px 51px;
 
     font-size: 18px;
@@ -90,8 +94,26 @@ input {
     cursor: pointer;
 }
 
+.btn__close {
+    background-color: var(--lilac-color);
+    border-radius: 5px;
+    border: 1px solid #000000;
+    padding: 7px 54px;
+
+    font-size: 18px;
+    line-height: 23px;
+    letter-spacing: 0.05em;
+    margin: 5px 0 5px 0;
+
+    cursor: pointer;
+}
+
 .btn__container {
     display: flex;
     justify-content: center;
 }
 
+.help-block {
+    font-size: 0.8rem;
+    color:brown;
+}

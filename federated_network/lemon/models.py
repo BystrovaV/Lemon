@@ -1,7 +1,7 @@
 import json
 
 from django.db.models import Model, ForeignKey, CharField, TextField, BooleanField
-from django.db.models import BinaryField, DateField, ManyToManyField
+from django.db.models import BinaryField, DateField, ManyToManyField, DateTimeField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
@@ -94,7 +94,7 @@ class Activity(Model):
 
     ap_id = TextField()
     payload = BinaryField()
-    created_at = DateField(auto_now_add=True)
+    created_at = DateTimeField(auto_now_add=True)
     person = ForeignKey(Person, related_name='activities', on_delete=models.CASCADE)
     remote = BooleanField(default=False)
 

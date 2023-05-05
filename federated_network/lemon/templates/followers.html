@@ -22,19 +22,19 @@
                     <div class="search__inner">
                         <div class="search__wrap">
                             <!-- <img class="close__img" src="{% static 'lemon/img/close.png' %}"/> -->
-                            <div class="close__img"></div>
+                            <img class="close__img" src="{% static 'lemon/img/close.png' %}"/>
                             <input name="search" id="search" placeholder="Search" class="search" value="{{ search |safe}}"/>
                         </div>
                         <button class="btn__submit">
                             <!-- <img class="btn__search img" src="{% static 'lemon/img/loupe.png' %}"/> -->
-                            <div class="btn__search img"></div>
+                            <img class="btn__search img" src="{% static 'lemon/img/loupe.png' %}"/>
                         </button>
                     </div>
                 <!-- </form> -->
             </div>
             <div>
                 {% for follower in followers %}
-                <div class="item" id="{{ follower.preferredUsername |safe}}">
+                <div class="item item{% if forloop.counter0|divisibleby:2 %}1{% else %}0{% endif %}" id="{{ follower.preferredUsername |safe}}">
                     <div class="item__left">
                         <h2 class="item__name">{{ follower.name |safe}}</h2>
                         <p class="item__id">{{ follower.preferredUsername |safe}}</p>
@@ -66,19 +66,41 @@
             $("#search").on('click', showAll);
 
             function showAll() {
+                var temp = 0;
+
                 data.forEach(item => {
-                    $(document.getElementById(item.preferredUsername)).show(); 
-                });
+                    var elem = $(document.getElementById(item.preferredUsername));
+                    if (temp % 2 == 0) {
+                            elem.removeClass("item0");
+                            elem.addClass("item1");
+                        } else {
+                            elem.removeClass("item1");
+                            elem.addClass("item0");
+                        }    
+                    temp++;
+
+                    elem.show();                });
             }
 
             $(".btn__search").on('click', function () {
                 var search = $('#search').val();
 
+                var temp = 0;
                 data.forEach(item => {
                     if (!item.name.includes(search) && !item.preferredUsername.includes(search)) {
                         $(document.getElementById(item.preferredUsername)).hide();
-                    }
-                        
+                    } else {
+                        var elem =  $(document.getElementById(item.preferredUsername));
+
+                        if (temp % 2 == 0) {
+                            elem.removeClass("item0");
+                            elem.addClass("item1");
+                        } else {
+                            elem.removeClass("item1");
+                            elem.addClass("item0");
+                        }
+                        temp++;
+                    }  
                 });
             });
 

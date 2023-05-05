@@ -16,13 +16,20 @@
         
             <form method="post">
                 {% csrf_token %}
-                <div class="input__field">
-                    <p class="input__label">Username</p>
-                    <input name="username" class="input__name"/>
+                <div class="field">
+                    <div class="input__field">
+                        <p class="input__label">Username</p>
+                        <input name="username" class="input__name"/>
+                    </div>
                 </div>
-                <div class="input__field">
-                    <p class="input__label">Password</p>
-                    <input name="password" class="input__name" type="password"/>
+                <div class="field">
+                    <div class="input__field">
+                        <p class="input__label">Password</p>
+                        <input name="password" class="input__name" type="password"/>
+                    </div>
+                </div>
+                <div class="errors">
+                    <div class="help-block">{{ error }}</div>
                 </div>
             
                 <div class="btn__container">

@@ -52,6 +52,7 @@
 
 .recievers {
     display: flex;
+    flex-wrap: wrap;
 }
 
 /* .reciever {

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About</title>
+    
+    <link rel="stylesheet" href={% static "lemon/variables.css" %}>
+    <link rel="stylesheet" href={% static "lemon/about.css" %}>
+    <link rel="stylesheet" href={% static "lemon/person-main.css" %}>
+    <link rel="stylesheet" href={% static "lemon/followers.css" %}>
+</head>
+<body>
+    <div class="wrapper">
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar__inner">{%include 'navigation-bar.html'%}</div>
+        </div>
+        <div class="main page__body">
+            <div class="search__panel">
+                <div class="search__inner">
+                    <div class="search__wrap">
+                        <img class="close__img" src="{% static 'lemon/img/close.png' %}"/>
+                        <input name="search" id="search" placeholder="Search" class="search" value="{{ search |safe}}"/>
+                    </div>
+                    <button class="btn__submit">
+                        <img class="btn__search img" src="{% static 'lemon/img/loupe.png' %}"/>
+                    </button>
+                </div>
+            </div>
+            <div>
+                {% for host_key, host_value in hosts.items%}
+                    <div class="item item0 host">{{host_key |safe}}</div>
+                    {% for person in host_value%}
+                        <div class="item item1" id="{{ person.preferredUsername |safe}}">
+                            <div class="item__left">
+                                <h2 class="item__name">{{ person.name |safe}}</h2>
+                                <p class="item__id">{{ person.preferredUsername |safe}}</p>
+                            </div>
+                            <div class="btns">
+                                {% if person.relationship == 2 %}
+                                <div class="btn-about-func btn-font-small" id="follow{{person.preferredUsername}}" onclick="follow(this)">Follow</div>
+                                {% elif person.relationship == 1 %}
+                                <div class="btn-about btn-font-small">You're Following</div>
+                                {% elif person.relationship == 13 %}
+                                <div class="btn-about btn-font-small">You're Following</div>
+                                <div class="btn-about btn-font-small">Your Follower</div>
+                                {% elif person.relationship == 23 %}
+                                <div class="btn-about-func btn-font-small" id="follow{{person.preferredUsername}}" onclick="follow(this)">Follow</div>
+                                <div class="btn-about btn-font-small">Your Follower</div>
+                                {% endif %}
+
+                                {% if permission == 0%}
+                                <img class="img message" src="{% static 'lemon/img/message.png' %}">
+                                {% endif %}
+                                <img class="img visit" id="visit{{person.id |safe}}" src="{% static 'lemon/img/right.png' %}">
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $(".btn__search").on('click', function () {
+                var search = $('#search').val();
+                
+                var temp = 0;
+
+                var data = document.getElementsByClassName("item1");
+                for (var i = 0; i < data.length; i++) {
+                    if (!$(data[i]).attr("id").includes(search)) {
+                        $(data[i]).hide();
+                    }
+                }
+                
+            });
+
+            $(".close__img").on('click', function () {
+                event.cancelBubble = true;
+                if(event.stopPropagation) 
+                    event.stopPropagation();
+                
+                document.getElementById("search").value = "";
+                showAll();
+            });
+
+            $("#search").on('click', showAll);
+
+            function showAll() {
+                var data = document.getElementsByClassName("item1");
+                for (var i = 0; i < data.length; i++) {
+                    $(data[i]).show();
+                }
+            }
+
+            var user_uri = "{{user.uris.id}}";
+
+            $(".message").on('click', function() {
+                event.cancelBubble = true;
+                if(event.stopPropagation) 
+                    event.stopPropagation();
+
+                path = user_uri + "/notes/note-create?to=" + 
+                    $(this).parent(".btns").parent(".item").attr("id");
+
+                window.location.href = path;
+            });
+
+            $(".visit").on('click', function() {
+                person_uri = $(this).attr("id");
+                if (person_uri.startsWith("visit")) {
+                    person_uri = person_uri.substring(5);
+                    window.open(person_uri);
+                }
+                
+            });
+
+            
+        });
+
+        var user_uri = "{{user.uris.id}}";
+
+        function follow(elem) {
+            event.cancelBubble = true;
+            if(event.stopPropagation) 
+                event.stopPropagation();
+
+            if (elem.id.startsWith("follow")) {
+                person_uri = elem.id.substring(6);
+                console.log(person_uri);
+            }
+            else
+                return;
+
+            $.ajax(
+            {
+                type:"GET",
+                url: "/follow",
+                data:{
+                        followed_username: person_uri
+                },
+                success: function( data ) 
+                {
+                    elem.innerText = "You're Following";
+                    elem.classList.remove("btn-about-func");
+                    elem.classList.add("btn-about");
+                    elem.removeAttribute("onclick");
+                }
+            })
+        }
+    </script>
+</body>
+</html>

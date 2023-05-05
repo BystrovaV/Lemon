@@ -18,11 +18,17 @@
                 {% csrf_token %}
             
                 {% for field in form %}
-                <div class="input__field">
-                    <p class="input__label">{{field.label_tag}}</p>
-                    {{field}}
+                <div class="field">
+                    <div class="input__field">
+                        <p class="input__label">{{field.label_tag}}</p>
+                        <div class="input__name">{{field}}</div>
+                    </div>
                     <div class="errors">
-                        {{field.errors}}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                            <div class="help-block">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}

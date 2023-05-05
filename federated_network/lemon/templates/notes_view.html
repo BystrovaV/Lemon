@@ -26,6 +26,12 @@
         <button class="btn-message" onclick="message()"></button>
         {% endif %}
         <h2>{{person.username |safe}}</h2>
+        <!-- <div class="tooltip">
+            <button onclick="copy()" class="tooltip-btn" onmouseout="outCopy()">
+                <span class="tooltiptext" id="myTooltip-1">Copy to clipboard</span>
+                Copy
+            </button>
+        </div> -->
     </div>
     {% endif %}
 
@@ -49,7 +55,7 @@
             <div class="creation__date">{{ note.created_at |safe}}</div>
             {% if permission == 0 %}
             <div class="reciever__username"><p>To:<br>
-                {% if note.to|length == 0%}
+                {% if note.to|length == 0 or note.to == person.uris.followers %}
                     All Followers
                 {% endif %}
                 {% for reciever in note.to %}
@@ -92,7 +98,7 @@
                 type:"GET",
                 url: "/follow",
                 data:{
-                        followed_id: person_uri
+                        followed_username: person_uri
                 },
                 success: function( data ) 
                 {
@@ -103,6 +109,19 @@
                 }
             })
         }
+
+        // function copy() {
+        //     console.log(user_uri);
+        //     navigator.clipboard.writeText(user_uri);
+            
+        //     tooltip.innerHTML = "Copied!";
+        // }
+
+        // function outCopy(tooltip) {
+        //     // var tooltip = document.getElementsByClassName("");
+        //     tooltip.children[0].innerText = "Copy to clipboard";
+        //     // tooltip.innerHTML = "Copy to clipboard";
+        // }
     </script>
 </body>
 </html>

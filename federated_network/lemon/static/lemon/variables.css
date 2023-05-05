@@ -18,7 +18,8 @@ html{
     --yellow-color: #F0EEDA;
     --rose-color: #DAA2C4;
     --lilac-color: #F7F2FF;
-    --lilac-dark-color: #E5DCF3;
+    --lilac-dark-color: rgb(229, 220, 243);
+    --lilac-dark-color-opacity: rgba(229, 220, 243, 0.5);
     --yellow-dark-color: #EAE7C7;
     /* --rose-color: #EEB8CF;
     --shadow-color: rgba(85, 3, 3, 0.2);
@@ -67,6 +68,7 @@ html{
     background-position: center;
     background-repeat: no-repeat;
 }
+
 
 /* ------------------------ LIKE IMAGE ---------------------------*/
 .like__img {

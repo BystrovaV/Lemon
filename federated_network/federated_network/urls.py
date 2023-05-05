@@ -37,6 +37,7 @@ urlpatterns = [
     path("likepost/", views.likepost, name="likepost"),
     path("sign-up/", views.sign_up, name="sign-up"),
     path("logout/", views.logout_view, name="logout"),
-    # path("about/", name="about"),
+    path("about/", views.about, name="about"),
+    # path("sse", views.sse, name="sse"),
     path("", views.sign_in, name="sign-in"),
 ]
