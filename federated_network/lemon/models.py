@@ -5,6 +5,7 @@ from django.db.models import BinaryField, DateField, ManyToManyField, DateTimeFi
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
+from django.contrib.auth.models import User
 
 from django.conf import settings
 from django.urls import reverse
@@ -23,6 +24,8 @@ class URIs(object):
 
 
 class Person(Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+
     ap_id = TextField(null=True)
     remote = BooleanField(default=False)
 
@@ -122,3 +125,9 @@ def save_ap_id(sender, instance, created, **kwargs):
     if created and not instance.remote:
         instance.ap_id = instance.uris.id
         instance.save()
+
+
+@receiver(post_save, sender=User)
+def save_person(sender, instance, created, **kwargs):
+    if created:
+        Person.objects.create(user=instance, username=instance.username, name=instance.first_name)

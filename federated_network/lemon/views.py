@@ -10,7 +10,7 @@ import time
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from lemon.activities.objects import as_activitystream
-from lemon.models import Person, Note, Activity
+from lemon.models import Person, Note, Activity, uri
 from lemon.activities import objects, verbs
 from lemon.users.forms import UserRegisterForm
 import lemon.users.users_checks as users_checks
@@ -40,18 +40,18 @@ def sign_up(request):
         form = UserRegisterForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            form.save(commit=True)
             
             username = form.cleaned_data.get('username')
-            name = form.cleaned_data.get('first_name')
+            # name = form.cleaned_data.get('first_name')
 
-            person = Person(username=username, name=name)
-            person.save()
+            # person = Person(username=username, name=name)
+            # person.save()
 
-            user = authenticate(request, username=username, password=form.cleaned_data.get('password'))
+            user = authenticate(request, username=username, password=form.cleaned_data.get('password1'))
             if user is not None:
                 login(request, user=user)
-                return HttpResponseRedirect(f"/@{username}")
+                return HttpResponseRedirect(uri("person", username))
     else:
         form = UserRegisterForm()
     return render(request, 'sign-up.html', {'form': form})
