@@ -30,6 +30,10 @@
     margin-top: 5px;
 }
 
+textarea:disabled {
+    background: #ffffff;
+}
+
 .user-to__container {
     width: fit-content;
     height: 25px;

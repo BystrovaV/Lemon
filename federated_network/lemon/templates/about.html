@@ -49,7 +49,7 @@
                                 <div class="btn-about btn-font-small">Your Follower</div>
                                 {% endif %}
 
-                                {% if permission == 0%}
+                                {% if person.relationship != 0%}
                                 <img class="img message" src="{% static 'lemon/img/message.png' %}">
                                 {% endif %}
                                 <img class="img visit" id="visit{{person.id |safe}}" src="{% static 'lemon/img/right.png' %}">
