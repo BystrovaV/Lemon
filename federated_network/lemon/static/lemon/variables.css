@@ -81,3 +81,52 @@ html{
     /* right: calc(33px + 25px + 15px); */
 }
 /* -----------------------------------------------------*/
+
+/*--------------------------------- NOTIFICATION ---------------------------*/
+.notification {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 25%;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #91709ced;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-white-close {
+    position: absolute;
+    right: 10px;
+
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+
+    background: none;
+    background-image: url("img/close_white.png");
+    background-size: 16px;
+
+    width: 16px;
+    height: 16px;
+}
+
+.notification_msg {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+/*------------------------ COUNT MSG -----------------------*/
+.nav__inbox {
+    display: flex;
+    align-items: center;
+}
+
+.count-msg {
+    margin-left: 20px;
+    background-color: rgba(145, 112, 156, 0.74);
+    color: white;
+    padding: 3px;
+    border-radius: 10px;
+}

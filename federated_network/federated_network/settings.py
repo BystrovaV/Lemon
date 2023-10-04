@@ -35,9 +35,17 @@ ALLOWED_HOSTS = ["alice.local", "bob.local"]
 USE_X_FORWARDED_HOST = True
 FEDERATED_NETWORK_DOMAIN = "alice.local"
 
+ASGI_APPLICATION = "federated_network.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

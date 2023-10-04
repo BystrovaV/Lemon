@@ -50,8 +50,16 @@
         </div>
     </div>
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'js/notification.js' %}"></script>
     <script>
         $(document).ready(function () {
+            var user_name = "{{user.username}}";
+
+            if (user_name != "") {
+                var userWebSocket = new UserWebSocket(user_name);
+                userWebSocket.connect();
+            }
+
             var data = {{ followers |safe}};
            
             $(".close__img").on('click', function () {

@@ -3,8 +3,16 @@
     margin: 21px 0;
 }
 
+.item1.is_read {
+    background-color: var(--yellow-dark-color);
+}
+
 .item0 {
     background-color: var(--lilac-color);
+}
+
+.item0.is_read {
+    background-color: var(--lilac-dark-color);
 }
 
 .item:last-child {

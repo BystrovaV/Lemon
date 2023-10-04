@@ -51,5 +51,14 @@
         </div>
     </div>
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'js/notification.js' %}"></script>
+    <script>
+        var user_name = "{{user.username}}";
+
+        if (user_name != "") {
+            var userWebSocket = new UserWebSocket(user_name);
+            userWebSocket.connect();
+        }
+    </script>
 </body>
 </html>

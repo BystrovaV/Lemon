@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import requests
@@ -17,6 +18,11 @@ import lemon.users.users_checks as users_checks
 import lemon.users.outbox_deliver as outbox_deliver
 
 from django.contrib.auth import authenticate, login, logout
+
+from channels.layers import get_channel_layer
+from asyncio import run_coroutine_threadsafe
+
+from lemon.websockets.consumers import NotificationsType, UserMessage
 
 
 # вход в систему
@@ -85,7 +91,6 @@ def person_main(request, username):
     permission = users_checks.is_visitor_main(user, person)
     # collection = users_checks.person_get_notes(person)
     collection = users_checks.person_get_all_notes(person, permission)
-    print(collection)
 
     data = {"person": person, "user": user, "notes": collection, "permission": permission}
     return render(request, "person-main.html", context=data)
@@ -100,6 +105,18 @@ def following_view(request, username):
     
     if users_checks.is_visitor(request.user, username=username):
         return users_checks.response_error()
+    
+    # notification = UserMessage(person_username="Alice",
+    #                                msg_type=NotificationsType.NEW_MSG,
+    #                                activity={    
+    #                                     "type": "chat_message",
+    #                                     "id": "http://alice.local/@user/outbox/123",
+    #                                     "actor": "http://alice.local/@User1",
+    #                                     "object": {
+    #                                         "content": "Hello!"
+    #                                     },})
+    
+    # notification.send_notification()
 
     user = get_object_or_404(Person, username=username)
     # following = objects.OrderedCollection(user.following.all()).items
@@ -233,7 +250,7 @@ def followers_view(request, username):
             return users_checks.response_error()
         
         user_followers = list(map(lambda x: x.to_activitystream(), user_followers))
-        print(user_followers)
+        # print(user_followers)
         return render(request, "followers.html", context={"user":user, "followers": user_followers, "search": ""})
 
 
@@ -391,34 +408,54 @@ def inbox_view(request, username):
 
         if hostname != "undefined" and actor != "undefined" and _id != -1 and domen != "undefined":
             ap_id = "http://" + hostname + "." + domen + "/" + actor + "/outbox/" + _id
-            # print(ap_id)
+
             activity = Activity.objects.get(ap_id=ap_id, person=person)
             liked = outbox_deliver.get_if_like_by_activity(activity)
+
+            is_read = activity.is_read
 
             payload = activity.payload.decode("utf-8")
             activity = json.loads(payload, object_hook=objects.as_activitystream)
 
-            return render(request, "inbox_item.html", context={"user":person, "activity":activity, "liked": liked})
-            # return JsonResponse(activity.to_json(context=True))
-            # return render(request, "note_view.html", context=data)
+            print(activity)
+
+            return render(request, "inbox_item.html", context=
+                          {"user":person, "activity":activity, "liked": liked, "is_read": 1 if is_read is True else 0})
 
         _object = person.activities.filter(remote=True).order_by('-id')
         collection = objects.OrderedCollection(_object).to_json(context=True)["orderedItems"]
 
         data = {"user": person, "collection": collection}
-        print(data)
+        # print(collection)
         return render(request, "inbox.html", context=data)
 
     payload = request.body.decode("utf-8")
     activity = json.loads(payload, object_hook=as_activitystream)
+    # print(activity)
     activity.validate()
 
     if activity.type == "Create":
         handle_note(activity)
+
+        notification = UserMessage(person_username=person.username,
+                                   msg_type=NotificationsType.NEW_MSG,
+                                   activity=activity)
+        notification.send_notification()
+
     elif activity.type == "Follow":
         handle_follow(activity)
+
+        notification = UserMessage(person_username=person.username,
+                                   msg_type=NotificationsType.FOLLOW,
+                                   activity=activity)
+        notification.send_notification()
     elif activity.type == "Like":
         handle_like(activity)
+
+        notification = UserMessage(person_username=person.username,
+                                   msg_type=NotificationsType.LIKE,
+                                   activity=activity)
+        notification.send_notification()
     elif activity.type == "Undo":
         print("inbox undo")
         handle_undo(activity, person)
@@ -521,16 +558,25 @@ def notes_view(request, username):
     #return JsonResponse(collection.to_json(context=True))
 
 
-# @login_required(login_url="/")
 def note_view(request, username, note_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect("/")
     
+    if users_checks.is_visitor(request.user, username=username):
+        return users_checks.response_error()
+    
+    user = get_object_or_404(Person, username=username)
+
     note = get_object_or_404(Note, pk=note_id)
-    return JsonResponse(objects.Note(note).to_json(context=True))
+    
+    activity = users_checks.get_activity_by_note(user=user, note=note)
+    payload = activity.payload.decode("utf-8")
+    activity = json.loads(payload, object_hook=objects.as_activitystream)
+
+    return render(request, "outbox_item.html", context={"user":user, "activity":activity})
+    # return JsonResponse(objects.Note(note).to_json(context=True))
 
 
-# @login_required(login_url="/")
 def note_create(request, username):
     if not request.user.is_authenticated:
         return HttpResponseRedirect("/")
@@ -556,10 +602,8 @@ def note_create(request, username):
 def note_create_validator(request, username):
     person = get_object_or_404(Person, username=username)
 
-    # TODO: for all followers
     recievers = request.POST.getlist("reciever", [])
     
-    # print(request.POST)
     content = request.POST.get("content", "Undefined")
 
     audience = []
@@ -579,53 +623,12 @@ def note_create_validator(request, username):
     if len(audience) == 0:
         audience.append(person.uris.followers)
     
-    # print(audience)
     note = objects.Note(content=content)
     create = verbs.Create(to=audience, object=note, actor=person.uris.id)
     requests.post(person.uris.outbox, json=create.to_json())
-
-    # return HttpResponse(f"""
-    #             <div>{audience}</div>
-    #         """)
-    # username1 = request.POST.get("username", "Undefined")
-    # content = request.POST.get("content", "Undefined")
-
-    # if username1 == '':
-    #     note = objects.Note(content=content)
-    #     requests.post(person.uris.outbox, json=note.to_json())
-    # else:
     
     return HttpResponseRedirect(f"{person.uris.id}")
 
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect("/")
-
-
-# from datetime import datetime
-
-
-# @require_GET
-# def sse(request):
-#     response = StreamingHttpResponse(content_type='text/event-stream')
-#     person = get_object_or_404(Person, username=request.user)
-
-#     def stream():
-#         # updates = Activity.objects.filter(created_at__gt=datetime(2023, 1, 1, 0, 0, 0))
-#         # print(updates)
-#         # print("Hello")
-#         # yield b"data: Hello\n\n"
-#         # time.sleep(1)
-#         last_update_time = timezone.now()
-
-#         while True:
-#             inserts = person.activities.filter(remote=True, created_at__gt=last_update_time).order_by('-id')
-#             print(len(inserts))
-#             if len(inserts) > 0:
-#                 collection = objects.OrderedCollection(inserts).to_json(context=True)["orderedItems"]
-#                 yield f"data: {json.dumps(collection)}\n\n"
-#                 last_update_time = inserts.last().created_at
-#             time.sleep(10)
-
-#     response.streaming_content = stream()
-#     return response

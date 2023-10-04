@@ -3,7 +3,7 @@ from django.contrib.sites import requests
 
 
 class Object(object):
-    attributes = ["type", "id", "name", "to", "bto", "bcc", "cc"]
+    attributes = ["type", "id", "name", "to", "bto", "bcc", "cc", "is_read"]
     type = "Object"
 
     @classmethod
@@ -24,6 +24,11 @@ class Object(object):
             if value is None:
                 continue
 
+            if key == "is_read":
+                if value is False:
+                    value = 0
+                elif value is True:
+                    value = 1
             # if isinstance(value, dict) and value.get("type"):
             #     value =
             self.__setattr__(key, value)
@@ -48,16 +53,6 @@ class Object(object):
         get_from_array(values, "bto")
         get_from_array(values, "bcc")
         get_from_array(values, "cc")
-        # to = values.get("to")
-        # if isinstance(to, str):
-        #     values["to"] = [to]
-        # elif getattr(to, "__iter__", None):
-        #     values["to"] = []
-        #     for item in to:
-        #         if isinstance(item, str):
-        #             values["to"].append(item)
-        #         if isinstance(item, Object):
-        #             values["to"].append(item.id)
 
         if context:
             values["@context"] = "https://www.w3.org/ns/activitystreams"
@@ -109,6 +104,8 @@ class Collection(Object):
 
     def __init__(self, iterable=None, **kwargs):
         self._items = []
+
+        # print(iterable)
 
         Object.__init__(self, **kwargs)
         if iterable is None:

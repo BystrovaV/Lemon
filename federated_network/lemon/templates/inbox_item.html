@@ -60,7 +60,27 @@
         </div>
     </div>
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'js/notification.js' %}"></script>
     <script>
+        var userWebSocket = undefined;
+
+        window.addEventListener('load', function(event) {
+            isRead = {{is_read| safe}};
+
+            var user_name = "{{user.username}}";
+            console.log(user_name);
+            if (user_name != "") {
+                userWebSocket = new UserWebSocket(user_name);
+                userWebSocket.connect();
+            }
+
+            if (isRead == 0) {
+                if (userWebSocket != undefined) {
+                    userWebSocket.sendIsRead("{{activity.id| safe}}", "true");
+                }
+            }
+        });
+
         $(".like__img").click(function(){
             event.cancelBubble = true;
             if(event.stopPropagation) 

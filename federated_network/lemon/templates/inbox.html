@@ -37,7 +37,7 @@
             <div>
                 {% for item in collection %}
                 <div class="item item{% if forloop.counter0|divisibleby:2 %}1{% else %}0{% endif %} 
-                {% if item.type == 'Create' %}create{% endif %}" id="{{ item.id |safe}}">
+                {% if item.type == 'Create' %}create{% endif %} {% if item.is_read == 1 %}is_read{% endif %}" id="{{ item.id |safe}}">
                     <div class="item__left">
                         <h2 class="item__type">{{ item.type |safe }}</h2>
                         <p class="item__to">{{ item.actor |safe}}</p>
@@ -61,6 +61,7 @@
         </div>
     </div>
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'js/notification.js' %}"></script>
     <script>
         $(".create").on('click', function () {
             event.cancelBubble = true;
@@ -83,7 +84,7 @@
 
         var data = {{collection |safe}};
         
-        console.log("My data: ");
+        //console.log(data);
 
         function filter(btn) {
             var i, temp = 0;
@@ -127,17 +128,12 @@
             }
         }
 
-        // function startSSE() {
-        //     var source = new EventSource('/sse');
-        //     source.onmessage = function(event) {
-        //         var message = JSON.parse(event.data);
-        //         // console.log(message);
+        var user_name = "{{user.username}}";
 
-        //         // console.log("Before: " + data.length);
-        //         // data.concat(message);
-        //         console.log("After: " + message.length);
-        //     }
-        // }
+        if (user_name != "") {
+            var userWebSocket = new UserWebSocket(user_name);
+            userWebSocket.connect();
+        }
     </script>
 </body>
 </html>

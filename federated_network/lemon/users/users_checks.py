@@ -60,7 +60,7 @@ def person_get_all_notes(person, permission):
             likes_people = note.likes.all()
 
             note = note.to_activitystream()
-            print(note)
+            # print(note)
             note["likes_cnt"] = likes_cnt
             note["likes_people"] = list(map(lambda x: x.to_activitystream(), likes_people))
 
@@ -116,5 +116,24 @@ def get_users_by_hosts(user):
         person = person.to_activitystream()
         person["relationship"] = relationship
         dict_persons[person["id"][7:person["id"].index("@") - 1]].append(person)
-    print(dict_persons)
+    # print(dict_persons)
     return dict_persons
+
+def get_activity_by_note(user, note):
+
+    activities = Activity.objects.filter(person=user, remote=False)
+    
+    for activity in activities:
+        payload = activity.to_activitystream()
+
+        if payload["type"] != "Create":
+            continue
+        
+        payload = payload["object"]
+        if payload["type"] == "Note":
+            note_id = payload["id"]
+            if note_id == note.ap_id:
+                print("urgyfurhfh")
+                return activity
+    
+    return None

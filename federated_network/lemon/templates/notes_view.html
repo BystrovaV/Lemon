@@ -25,13 +25,10 @@
         <div class="btn-friend btn-disabled btn-font-small">You're Following</div>
         <button class="btn-message" onclick="message()"></button>
         {% endif %}
-        <h2>{{person.username |safe}}</h2>
-        <!-- <div class="tooltip">
-            <button onclick="copy()" class="tooltip-btn" onmouseout="outCopy()">
-                <span class="tooltiptext" id="myTooltip-1">Copy to clipboard</span>
-                Copy
-            </button>
-        </div> -->
+        <div>
+            <h2>{{person.username |safe}}</h2>
+            <p>{% if person.online == 0 %}offline{% else %}online{% endif %}</p>
+        </div>
     </div>
     {% endif %}
 
@@ -73,9 +70,11 @@
         {% endfor %}
     </div>
     <script src="{% static 'js/node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'js/notification.js' %}"></script>
     <script>
         var user_uri = "{{user.uris.id}}";
         var person_uri = "{{person.username}}";
+        var user_name = "{{user.username}}";
 
         function message() {
             event.cancelBubble = true;
@@ -110,18 +109,10 @@
             })
         }
 
-        // function copy() {
-        //     console.log(user_uri);
-        //     navigator.clipboard.writeText(user_uri);
-            
-        //     tooltip.innerHTML = "Copied!";
-        // }
-
-        // function outCopy(tooltip) {
-        //     // var tooltip = document.getElementsByClassName("");
-        //     tooltip.children[0].innerText = "Copy to clipboard";
-        //     // tooltip.innerHTML = "Copy to clipboard";
-        // }
+        if (user_name != "") {
+            var userWebSocket = new UserWebSocket(user_name);
+            userWebSocket.connect();
+        }
     </script>
 </body>
 </html>
